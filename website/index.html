@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1d46d2" />
+    <meta name="description" content="iPaste turns your MacBook notch into a fast, visual clipboard shelf." />
+    <title>iPaste — Your clipboard, right in the notch.</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="floating-nav" data-notch-nav>
+      <div class="nav-bar">
+        <a class="nav-brand" href="#top"><img class="app-icon" src="assets/ipaste-icon.png" alt="" /><strong>iPaste</strong></a>
+        <button class="notch-peek-toggle" type="button" aria-expanded="false" aria-controls="notch-nav-shelf" aria-label="Preview recent clipboard items"><span></span><span></span><span></span></button>
+        <nav class="nav-links"><a href="#notch">The Notch</a><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
+        <a class="download-pill" href="#download"><span>●</span> Download</a>
+        <button class="menu-toggle" aria-expanded="false" aria-controls="mobile-nav">Menu</button>
+      </div>
+      <div class="nav-shelf" id="notch-nav-shelf" aria-hidden="true">
+        <div class="nav-shelf-head"><span><i></i> Recent clips</span><kbd>⌘ ⇧ V</kbd></div>
+        <div class="nav-shelf-clips">
+          <button class="nav-shelf-clip clip-note" type="button"><span class="clip-kind">NOTE</span><strong>Launch checklist<br />for iPaste</strong><small>Notes · now</small></button>
+          <button class="nav-shelf-clip clip-link" type="button"><span class="clip-kind">LINK ↗</span><strong>Design handoff<br />in Figma</strong><small>Safari · 3 min</small></button>
+          <button class="nav-shelf-clip clip-color" type="button"><span class="clip-kind">COLOR</span><strong>#3567D6</strong><small>Figma · 8 min</small></button>
+        </div>
+        <div class="nav-shelf-foot"><span>Hover a clip to preview</span><span>Click the notch to keep open</span></div>
+      </div>
+    </header>
+    <nav class="mobile-nav" id="mobile-nav"><a href="#notch">The Notch</a><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="#download">Download</a></nav>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-glow hero-glow-one"></div><div class="hero-glow hero-glow-two"></div>
+        <div class="hero-content">
+          <div class="hero-eyebrow"><span class="notch-mini"></span> Lives in your MacBook notch</div>
+          <h1>Your clipboard.<br /><em>Right in the notch.</em></h1>
+          <p>iPaste turns the space around your notch into a visual clipboard shelf. Move to the top of your screen, find anything you copied, and paste it back without leaving your work.</p>
+          <a class="hero-button" href="#download"><span class="download-arrow">↓</span> Download for macOS</a>
+          <div class="hero-meta"><span>Always one glance away</span><span>Fully offline and private</span><span>macOS Sonoma 14+</span></div>
+        </div>
+        <div class="hero-shelf" aria-label="Expanded iPaste notch shelf preview">
+          <div class="shelf-sides shelf-left"><span>● iPaste Notch Shelf</span></div><div class="shelf-sides shelf-right"><span>⌕</span><span>⌁</span><span>09:41</span></div>
+          <div class="shelf-content"><div class="shelf-search">⌕ <span>Search your history...</span></div><div class="shelf-tabs"><span class="active">History <b>24</b></span><span>Snippets <b>18</b></span><span>Colors <b>12</b></span><span>Assets <b>32</b></span><span>Collections <b>8</b></span><span class="add">+</span></div><div class="shelf-cards"><article class="shelf-card image-card"><div class="fake-photo photo-one"><span>AN IDEA<br />WORTH KEEPING</span></div><small>Safari · 2 min ago</small></article><article class="shelf-card image-card"><div class="fake-photo photo-two"><span>Brand<br />references</span></div><small>Figma · 5 min ago</small></article><article class="shelf-card text-card"><div class="fake-text">Make space<br />for better<br /><em>ideas.</em></div><small>Notes · 8 min ago</small></article><article class="shelf-card color-card"><div class="fake-color"><span>#4D72FF</span></div><small>Color · 19 min ago</small></article><article class="shelf-card code-card"><div class="fake-code">git checkout<br />-b new-idea</div><small>Terminal · 22 min ago</small></article></div></div>
+        </div>
+      </section>
+
+      <section class="intro section-white" id="notch"><div class="shelf-continuation" aria-hidden="true"><span class="continuation-line"></span><span class="continuation-label">FROM NOTCH TO WORKFLOW</span></div><div class="award-row"><span>✦ BUILT FOR THE NOTCH</span><span>● LOCAL FIRST</span><span>✦ PRIVACY FIRST</span><span>∞ ALWAYS AVAILABLE</span></div><h2>The notch,<br />now actually <em>useful.</em></h2><p>Move your pointer to the notch and iPaste expands into a focused clipboard shelf above whatever you’re doing. Search, drag, or paste — then it quietly disappears.</p><div class="feature-tags"><span>◒ Notch shelf</span><span>⌁ Hover to open</span><span>⌘ Quick search</span><span>↗ Drag anything</span><span>◌ Screenshots</span><span>✦ Collections</span></div></section>
+
+      <section class="feature-panel section-white" id="features"><div class="panel-copy"><h2>Your history<br />opens above<br /><em>your current app.</em></h2><p>The notch shelf expands without switching windows. Find a color from Figma, a link from Safari, a snippet from Terminal, or that screenshot from last week.</p></div><div class="wide-app-preview"><div class="wide-toolbar"><span>⌕ Search from the notch</span><div><i>☆</i><i>◌</i><i>⌁</i><i>↗</i></div></div><div class="wide-filters"><span>All</span><b>Text 12</b><b>Links 18</b><b>Images 8</b><b>Colors 5</b><b>Code 21</b><b>+</b></div><div class="wide-grid"><div class="wide-clip selected"><strong>Hi, {name},<br />just following up on my...</strong><small>Chrome · 1 min ago</small></div><div class="wide-clip sky-clip"><span>Brand<br />reference</span><small>Figma · 3 min ago</small></div><div class="wide-clip pink-clip"><span>#D6688B</span><small>Color · 6 min ago</small></div><div class="wide-clip green-clip"><span>#B7DE72</span><small>Color · 8 min ago</small></div><div class="wide-clip white-clip"><span>⌘<br />Quick note</span><small>Notes · 12 min ago</small></div></div></div></section>
+
+      <section class="feature-panel section-white reverse-panel"><div class="panel-copy"><h2>Open. Find.<br />Drag it out.<br /><em>Keep moving.</em></h2><p>Text, links, screenshots, images, code, colors, and files stay inside the notch shelf. Drag an item straight into your current app or paste it with one click.</p></div><div class="notch-preview"><div class="notch-glow"></div><div class="notch-window"><div class="notch-search">⌕ <span>Search the notch</span></div><div class="notch-pills"><b>All</b><span>Colors</span><span>Assets</span><span>Snippets</span><span>+</span></div><div class="notch-items"><div class="notch-item light"><strong>✦</strong><small>Idea</small></div><div class="notch-item light"><strong>♧</strong><small>Note</small></div><div class="notch-item pink"><strong>#D6688B</strong><small>Color</small></div><div class="notch-item lime"><strong>#B7DE72</strong><small>Color</small></div></div></div></div></section>
+
+      <section class="testimonial section-white"><div class="stars">★★★★★</div><blockquote>“Having my clipboard inside the notch feels completely natural. It’s there when I need it and invisible when I don’t.”</blockquote><div class="testimonial-person"><span class="avatar">A</span><div><strong>Alex Morgan</strong><small>Designer & maker</small></div></div></section>
+
+      <section class="audiences section-white" id="use-cases"><h2>Built for <em>everything</em><br />you copy.</h2><p>From design assets and code snippets to customer replies and personal notes, iPaste keeps every useful piece ready to reuse.</p><div class="audience-grid"><article><span class="audience-icon">✎</span><h3>Designers</h3><p>Keep colors, icons, screenshots, SVGs, gradients, references, and assets close at hand.</p></article><article><span class="audience-icon">&lt;/&gt;</span><h3>Developers</h3><p>Save code snippets, commands, errors, JSON, API responses, and links automatically.</p></article><article><span class="audience-icon">Aa</span><h3>Writers</h3><p>Capture hooks, taglines, drafts, research links, and all the phrases worth keeping.</p></article><article><span class="audience-icon">↗</span><h3>Founders</h3><p>Organize product ideas, investor notes, competitor screenshots, and daily research.</p></article><article><span class="audience-icon">♡</span><h3>Support teams</h3><p>Reuse your best replies, email templates, customer notes, and support screenshots.</p></article><article><span class="audience-icon">⌂</span><h3>Personal use</h3><p>Find addresses, recipes, links, quotes, images, and anything you meant to save.</p></article></div></section>
+
+      <section class="pricing" id="pricing"><div class="pricing-inner section-white"><h2>One price.<br /><em>Lifetime access.</em></h2><p>One-time payment. No subscription. Get iPaste on your Mac and keep every feature unlocked from day one.</p><div class="price-card"><div class="price-title"><img class="app-icon" src="assets/ipaste-icon.png" alt="" /><strong>iPaste for macOS</strong></div><div class="device-pills"><b>1 device</b><span>2 devices</span><span>3 devices</span></div><div class="price-value"><small>$</small><strong>—</strong></div><div class="price-note">Pricing will be announced<br />when iPaste is ready.</div><ul><li>One-time payment</li><li>Private by default</li><li>Lifetime updates included</li><li>Native macOS app</li></ul><button class="hero-button notify-button">Keep me posted <span>↗</span></button></div></div></section>
+
+      <section class="faq section-white" id="faq"><h2>Frequently asked<br /><em>questions.</em></h2><p>Everything you need to know about the iPaste notch shelf, privacy, compatibility, and clipboard storage.</p><div class="faq-grid"><details open><summary>How does the notch shelf work?<span>+</span></summary><p>Move your pointer to the MacBook notch or use the keyboard shortcut. iPaste expands above your current app, then closes when you’re done.</p></details><details><summary>Does iPaste upload my copied content?<span>+</span></summary><p>No. Your clipboard history stays on your Mac. iPaste is local-first and private by default.</p></details><details><summary>What types of content does iPaste support?<span>+</span></summary><p>Text, links, screenshots, images, code, colors, and files — all organized in a visual history.</p></details><details><summary>Can I use iPaste without a notch?<span>+</span></summary><p>Yes. The notch shelf is the signature experience, while a keyboard shortcut keeps iPaste fast on Macs with any display.</p></details><details><summary>Which Macs are supported?<span>+</span></summary><p>iPaste is being built for modern Macs running macOS Sonoma 14 or later.</p></details><details><summary>Is iPaste a subscription?<span>+</span></summary><p>No. iPaste is planned as a simple one-time purchase with lifetime updates included.</p></details></div></section>
+
+      <section class="download-section" id="download"><div class="download-inner"><img class="app-icon" src="assets/ipaste-icon.png" alt="iPaste app icon" /><div class="download-label">iPaste / Built for the notch</div><h2>Your clipboard.<br /><em>One glance away.</em></h2><p>Turn the top of your Mac into the fastest place to find anything you copied.</p><button class="hero-button notify-button"><span class="download-arrow">↓</span> Download for macOS</button><small>Coming soon for macOS Sonoma 14 and later.</small></div></section>
+    </main>
+
+    <footer class="footer"><div class="footer-inner section-white"><div class="footer-product"><div class="price-title"><img class="app-icon" src="assets/ipaste-icon.png" alt="" /><strong>iPaste</strong><small>notch clipboard</small></div><h2>Your clipboard.<br /><em>Right in the notch.</em></h2><p>iPaste turns the top of your Mac into a private, visual shelf for everything you copy.</p><a class="footer-button" href="#download">Download for macOS ↗</a><small>© 2026 iPaste. All rights reserved.</small></div><div class="footer-column"><strong>Menu</strong><a href="#top">Home</a><a href="#notch">The Notch</a><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></div><div class="footer-column"><strong>Navigation</strong><a href="#use-cases">Use cases</a><a href="#download">Early access</a><a href="mailto:hello@ipaste.app">Contact</a></div><div class="footer-column"><strong>More</strong><a href="#features">Privacy</a><a href="#faq">Support</a><a href="#top">Back to top ↑</a></div></div><div class="footer-word">iPaste</div></footer>
+
+    <div class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-card"><button class="modal-close" aria-label="Close">×</button><img class="app-icon" src="assets/ipaste-icon.png" alt="" /><h2 id="modal-title">Be first in line.</h2><p>Leave your email and we’ll let you know the moment iPaste is ready for download.</p><form class="notify-form"><label for="email">Your email</label><div><input id="email" type="email" placeholder="you@example.com" required /><button class="hero-button" type="submit">I’m in ↗</button></div><small>We’ll only use it for the iPaste launch.</small></form><div class="form-success" hidden>You’re on the list. See you soon ✦</div></div></div>
+    <script src="script.js"></script>
+  </body>
+</html>
