@@ -50,7 +50,7 @@ struct NotchShelfView: View {
     /// instead of blinking out here and in again over there.
     @Namespace private var pillNamespace
 
-    private var clips: [Clip] {
+    private var filteredClips: [Clip] {
         var result = store.clips(matching: query, kind: activeKind, category: activeCategory)
         if showsPinnedOnly { result = result.filter(\.pinned) }
         if let activeSourceID {
@@ -59,7 +59,11 @@ struct NotchShelfView: View {
         if preferences.smartFiltersEnabled, let activeSmartFilter {
             result = result.filter { SmartClipClassifier.matches(activeSmartFilter, clip: $0) }
         }
-        return Array(result.prefix(24))
+        return result
+    }
+
+    private var clips: [Clip] {
+        Array(filteredClips.prefix(24))
     }
 
     private var sourceApps: [SourceAppFilter] {
@@ -72,10 +76,9 @@ struct NotchShelfView: View {
         }
     }
 
-    /// The compact shelf is intentionally glanceable: show only the five most
-    /// recent matching clips instead of turning the notch into a scroll list.
+    /// List mode is a recency view: pinned clips do not displace newer copies.
     private var listClips: [Clip] {
-        Array(clips.prefix(5))
+        Array(filteredClips.sorted { $0.createdAt > $1.createdAt }.prefix(5))
     }
 
     private var selectedClip: Clip? {
@@ -90,7 +93,20 @@ struct NotchShelfView: View {
 
     private var shelfHeight: CGFloat {
         if reminderClip != nil { return Theme.shelfReminderHeight }
-        return selectedClip == nil ? Theme.shelfHeight : Theme.shelfExpandedHeight
+        let baseHeight = showsList ? listShelfHeight : Theme.shelfHeight
+        let inspectorHeight = Theme.shelfExpandedHeight - Theme.shelfHeight
+        return selectedClip == nil ? baseHeight : baseHeight + inspectorHeight
+    }
+
+    private var listShelfHeight: CGFloat {
+        let rowCount = min(listClips.count, 5)
+        guard rowCount > 0 else { return Theme.shelfHeight }
+
+        let rows = CGFloat(rowCount) * Theme.shelfListRowHeight
+        let gaps = CGFloat(max(rowCount - 1, 0)) * Theme.shelfListRowSpacing
+        let listContentHeight = rows + gaps + Theme.shelfListVerticalPadding
+        let shelfChromeHeight = Theme.shelfHeight - Theme.shelfCardsRowHeight
+        return max(Theme.shelfHeight, shelfChromeHeight + listContentHeight)
     }
 
     private var shelfWidth: CGFloat {
@@ -569,15 +585,15 @@ struct NotchShelfView: View {
         } else {
             if showsList {
                 ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(spacing: 6) {
+                    LazyVStack(spacing: Theme.shelfListRowSpacing) {
                         ForEach(Array(listClips.enumerated()), id: \.element.id) { index, clip in
                             ShelfListRow(clip: clip, index: index)
                         }
                     }
                     .padding(.horizontal, 18)
-                    .padding(.vertical, 2)
+                    .padding(.vertical, Theme.shelfListVerticalPadding / 2)
                 }
-                .frame(height: Theme.shelfCardsRowHeight)
+                .frame(height: listShelfHeight - (Theme.shelfHeight - Theme.shelfCardsRowHeight))
                 .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .top)))
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {

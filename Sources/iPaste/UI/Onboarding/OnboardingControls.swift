@@ -13,7 +13,7 @@ struct ShelfModePicker: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            Text("When should the shelf appear?")
+            Text("Choose how iPaste appears")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.white.opacity(0.48))
 
@@ -36,17 +36,19 @@ struct ShelfModePicker: View {
                 Text(title(for: mode))
                     .font(.system(size: 12, weight: .medium))
                 Text(caption(for: mode))
-                    .font(.system(size: 10))
+                    .font(.system(size: 9))
                     .opacity(0.7)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.88)
             }
             .foregroundStyle(isActive ? Color.white : Color.white.opacity(0.7))
-            .frame(width: 128, height: 44)
+            .frame(width: 146, height: 46)
             .background {
-                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(isActive ? OnboardingStyle.accent : Color.white.opacity(0.055))
             }
             .overlay {
-                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .strokeBorder(Color.white.opacity(isActive ? 0.16 : 0.08), lineWidth: 1)
             }
             .shadow(color: isActive ? OnboardingStyle.accent.opacity(0.2) : .clear, radius: 10, y: 4)
@@ -57,17 +59,17 @@ struct ShelfModePicker: View {
     /// Wording that belongs to the guide: `ShelfMode.label` stays the app own.
     private func title(for mode: ShelfMode) -> String {
         switch mode {
-        case .always:  return "Always on"
-        case .onHover: return "On hover"
-        case .never:   return "Never"
+        case .always:  return "Always"
+        case .onHover: return "On Hover"
+        case .never:   return "Shortcut"
         }
     }
 
     private func caption(for mode: ShelfMode) -> String {
         switch mode {
-        case .always:  return "stays open"
-        case .onHover: return "top edge · recommended"
-        case .never:   return "⌃⌘S only"
+        case .always:  return "Stays visible"
+        case .onHover: return "Recommended"
+        case .never:   return "Press ⌃⌘S"
         }
     }
 }
@@ -85,28 +87,44 @@ struct AccessibilityControl: View {
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        VStack(spacing: 12) {
-            statusPill
-
+        VStack(spacing: 9) {
             if granted {
-                Text("iPaste can now paste into the active app.")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.white.opacity(0.48))
+                statusPill
+                Text("iPaste can now paste directly into other apps.")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.58))
             } else {
-                Button("Open System Settings…", action: onRequest)
-                    .buttonStyle(OnboardingQuietStyle(prominent: true))
+                HStack(spacing: 18) {
+                    instruction(1, "Open Settings")
+                    instruction(2, "Turn on iPaste")
+                    instruction(3, "Return here")
+                }
 
-                Text("Skip it and iPaste still works — it puts the clip on the clipboard and you press ⌘V.")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.white.opacity(0.32))
-                    .multilineTextAlignment(.center)
-                    .frame(width: 380)
+                Button("Open Settings", action: onRequest)
+                    .buttonStyle(OnboardingPrimaryStyle())
+
+                Text("You can also continue and use ⌘V yourself.")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.white.opacity(0.34))
             }
         }
         .onReceive(ticker) { _ in
             let current = AXIsProcessTrusted()
             guard current != granted else { return }
             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { granted = current }
+        }
+    }
+
+    private func instruction(_ number: Int, _ text: String) -> some View {
+        HStack(spacing: 6) {
+            Text("\(number)")
+                .font(.system(size: 8, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(width: 18, height: 18)
+                .background(OnboardingStyle.accent, in: Circle())
+            Text(text)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(.white.opacity(0.62))
         }
     }
 
@@ -139,8 +157,7 @@ struct ReadySummary: View {
                     ShortcutLine(keys: ["⌃", "⌘", "S"], caption: "show or hide the shelf")
                 }
                 VStack(alignment: .leading, spacing: 6) {
-                    ShortcutLine(keys: ["⌃", "⌘", "L"], caption: "open the library")
-                    ShortcutLine(keys: ["⌃", "⌘", "0"], caption: "paste the latest clip")
+                    ShortcutLine(keys: ["⌃", "⌘", "0"], caption: "use the latest clip")
                 }
             }
 

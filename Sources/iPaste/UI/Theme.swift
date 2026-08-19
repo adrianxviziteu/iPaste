@@ -14,6 +14,9 @@ enum Theme {
     static let shelfWidth: CGFloat = 900
     static let shelfHeight: CGFloat = 252
     static let shelfExpandedHeight: CGFloat = 492
+    static let shelfListRowHeight: CGFloat = 39
+    static let shelfListRowSpacing: CGFloat = 6
+    static let shelfListVerticalPadding: CGFloat = 4
     static let shelfReminderWidth: CGFloat = 430
     static let shelfReminderHeight: CGFloat = 218
     static let shelfCardSize = CGSize(width: 148, height: 104)
@@ -29,9 +32,9 @@ enum Theme {
     /// The first-run guide, in its own window.
     /// Taller than it looks like it needs: a row of controls sits under the text
     /// (shelf mode, permission, launch at login) and would push the footer off.
-    static let onboardingSize = CGSize(width: 660, height: 650)
+    static let onboardingSize = CGSize(width: 620, height: 600)
     /// Fixed height for the illustrations: otherwise title and buttons jump every step.
-    static let onboardingHeroHeight: CGFloat = 230
+    static let onboardingHeroHeight: CGFloat = 205
     static let onboardingCornerRadius: CGFloat = 28
 
     /// A translucent backing, so a panel sits over content without hiding it.

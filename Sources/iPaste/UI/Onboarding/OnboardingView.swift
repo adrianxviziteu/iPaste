@@ -31,13 +31,13 @@ struct OnboardingView: View {
 
                 VStack(spacing: 11) {
                     Text(step.title)
-                        .font(.system(size: 27, weight: .bold))
+                        .font(.system(size: 29, weight: .semibold))
                         .tracking(-0.7)
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
 
                     Text(step.subtitle)
-                        .font(.system(size: 13, weight: .regular))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundStyle(.white.opacity(0.5))
                         .multilineTextAlignment(.center)
                         .lineSpacing(3)
@@ -66,22 +66,12 @@ struct OnboardingView: View {
         .tint(OnboardingStyle.accent)
         .animation(.spring(response: 0.38, dampingFraction: 0.86), value: step)
         .onAppear { hasPermission = app.paster.hasAccessibilityPermission(prompt: false) }
-        // The window is borderless and the permission step blocks the way forward,
-        // so Escape is the only way out for someone who cannot grant access at all.
-        // It dismisses the guide without advancing through it.
+        // Escape dismisses the borderless guide from any step.
         .onExitCommand { finish() }
     }
 
     /// Closing the guide: use the closure passed in if there is one, otherwise
     /// the coordinator own method.
-    /// The permission step is the one place the guide will not move past until
-    /// it has what it needs. Everything after it — pasting, the shortcuts, the
-    /// shelf — is inert without Accessibility access, so continuing would only
-    /// promise things that would not work.
-    private var isBlocked: Bool {
-        step == .permission && !hasPermission
-    }
-
     private func finish() {
         if let onFinish { onFinish() } else { app.finishOnboarding() }
     }
@@ -111,21 +101,11 @@ struct OnboardingView: View {
                     if let next = step.next { step = next } else { finish() }
                 }
                 .buttonStyle(OnboardingPrimaryStyle())
-                .disabled(isBlocked)
-                .opacity(isBlocked ? 0.4 : 1)
-                .help(isBlocked ? "Grant Accessibility access to continue" : "")
             }
             .padding(.horizontal, 30)
             .padding(.bottom, 22)
         }
         .padding(.top, 12)
-        .background {
-            LinearGradient(
-                colors: [Color.white.opacity(0.035), .clear],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        }
     }
 
     /// The steps that ask something of the user rather than just telling them
@@ -147,7 +127,7 @@ struct OnboardingView: View {
             }
         }
         .padding(.horizontal, 30)
-        .frame(height: 100)
+        .frame(height: step == .permission ? 122 : 100)
     }
 
     // MARK: - Illustrations
@@ -157,9 +137,7 @@ struct OnboardingView: View {
         switch step {
         case .welcome:    WelcomeHero()
         case .capture:    CaptureHero()
-        case .search:     SearchHero()
         case .shelf:      ShelfHero()
-        case .library:    LibraryHero()
         case .permission: PermissionHero(granted: hasPermission)
         case .ready:      ReadyHero()
         }

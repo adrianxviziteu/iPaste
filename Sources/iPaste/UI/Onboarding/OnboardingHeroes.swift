@@ -48,7 +48,7 @@ struct WelcomeHero: View {
 
             Divider().padding(.vertical, 4)
 
-            ForEach(["Invoice #2291 — paid", "stripe.com/invoices", "#1D6FE0"], id: \.self) { title in
+            ForEach(["Invoice #2291", "stripe.com/invoices", "#1D6FE0"], id: \.self) { title in
                 menuItem(title, keys: nil, dimmed: true)
             }
         }
@@ -164,7 +164,7 @@ struct SearchHero: View {
             Divider().opacity(0.5)
 
             VStack(spacing: 2) {
-                row("doc.on.clipboard", "Invoice #2291 — paid", "Text · Mail · 4m", selected: true)
+                row("doc.on.clipboard", "Invoice #2291", "Text · Mail · 4m", selected: true)
                 row("link", "stripe.com/invoices/2291", "Links · Safari · 6m")
                 row("photo", "Receipt screenshot", "Images · Preview · 20m")
             }
@@ -219,7 +219,7 @@ struct ShelfHero: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(OnboardingStyle.surface)
                 .overlay(alignment: .top) {
                     Rectangle()
@@ -227,7 +227,7 @@ struct ShelfHero: View {
                         .frame(height: 16)
                 }
                 .overlay {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .strokeBorder(OnboardingStyle.hairline, lineWidth: 1)
                 }
 
@@ -240,7 +240,7 @@ struct ShelfHero: View {
                 .offset(y: out ? 0 : -96)
         }
         .frame(width: 330, height: 186)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
         .onAppear {
             // One drop, on entering the step: the gesture reads immediately, and
@@ -271,7 +271,7 @@ struct ShelfHero: View {
 
             HStack(spacing: 6) {
                 ForEach(0..<4, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .fill(.white.opacity(0.07))
                         .frame(width: 60, height: 44)
                         .overlay {
@@ -280,7 +280,7 @@ struct ShelfHero: View {
                                 .foregroundStyle(.white.opacity(0.45))
                         }
                         .overlay {
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
                                 .strokeBorder(.white.opacity(0.09), lineWidth: 1)
                         }
                 }
@@ -290,7 +290,7 @@ struct ShelfHero: View {
         .padding(.top, 11)
         .frame(width: 278, height: 96, alignment: .top)
         .background(Color.black)
-        .clipShape(BottomRoundedRectangle(radius: 14))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
@@ -486,6 +486,13 @@ struct PermissionHero: View {
                         .padding(.horizontal, 2)
                 }
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: granted)
+
+            if !granted {
+                Text("TURN ON")
+                    .font(.system(size: 7, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundStyle(OnboardingStyle.accent)
+            }
         }
         .padding(.horizontal, 11)
         .frame(height: 44)

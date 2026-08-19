@@ -63,12 +63,7 @@ struct OnboardingNotchBar: View {
 
             Spacer(minLength: 18)
 
-            Text("NOTCH CLIPBOARD")
-                .font(.system(size: 7, weight: .bold))
-                .tracking(1.2)
-                .foregroundStyle(.white.opacity(0.35))
-
-            Text("\(step.rawValue + 1)/\(OnboardingStep.allCases.count)")
+            Text("\(step.rawValue + 1) of \(OnboardingStep.allCases.count)")
                 .font(.system(size: 9, weight: .semibold, design: .rounded))
                 .foregroundStyle(.white.opacity(0.5))
                 .padding(.horizontal, 8)
@@ -100,11 +95,11 @@ struct KeyCap: View {
             .frame(minWidth: size + 11, minHeight: size + 9)
             .padding(.horizontal, 4)
             .background {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(OnboardingStyle.surface)
             }
             .overlay {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .strokeBorder(OnboardingStyle.hairline, lineWidth: 1)
             }
     }
@@ -220,7 +215,7 @@ struct HeroStage<Content: View>: View {
 /// corner. Every illustration uses it, so they read as one family rather than
 /// seven separate drawings.
 struct MockChrome: ViewModifier {
-    var cornerRadius: CGFloat = 14
+    var cornerRadius: CGFloat = 16
 
     func body(content: Content) -> some View {
         content
@@ -238,7 +233,7 @@ struct MockChrome: ViewModifier {
 }
 
 extension View {
-    func mockChrome(cornerRadius: CGFloat = 10) -> some View {
+    func mockChrome(cornerRadius: CGFloat = 16) -> some View {
         modifier(MockChrome(cornerRadius: cornerRadius))
     }
 }

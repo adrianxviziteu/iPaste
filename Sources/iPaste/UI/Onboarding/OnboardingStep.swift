@@ -8,9 +8,7 @@ import Foundation
 enum OnboardingStep: Int, CaseIterable, Identifiable {
     case welcome
     case capture
-    case search
     case shelf
-    case library
     case permission
     case ready
 
@@ -18,38 +16,32 @@ enum OnboardingStep: Int, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .welcome:    return "Welcome to iPaste"
-        case .capture:    return "It remembers everything you copy"
-        case .search:     return "Find anything in two keys"
-        case .shelf:      return "The shelf next to the notch"
-        case .library:    return "Your history, right in the notch"
-        case .permission: return "One permission to grant"
-        case .ready:      return "You're all set"
+        case .welcome:    return "Meet iPaste"
+        case .capture:    return "Your clipboard, remembered"
+        case .shelf:      return "Always within reach"
+        case .permission: return "Paste with one click"
+        case .ready:      return "iPaste is ready"
         }
     }
 
     var subtitle: String {
         switch self {
         case .welcome:
-            return "The macOS clipboard holds one thing at a time. iPaste keeps them all and hands them back in seconds. Nothing ever leaves your Mac."
+            return "Everything you copy, ready in your notch."
         case .capture:
-            return "Text, links, code, colors, images, files — iPaste recognizes what you copied and files it under the right kind."
-        case .search:
-            return "⌃⌘V opens search anywhere. Type, pick with the arrow keys, press Enter and it pastes into the app you came from."
+            return "Text, links, colors, images, and files stay organized on your Mac."
         case .shelf:
-            return "Move the cursor to the top edge and the shelf drops out of the notch with your latest clips. Drag them straight where you need them."
-        case .library:
-            return "Use the notch shelf to browse your latest clips, switch between cards and list view, and search your history without opening another window."
+            return "Move to the notch, choose a clip, and keep going."
         case .permission:
-            return "To paste into the active app, iPaste sends a ⌘V keystroke. macOS requires Accessibility access for that."
+            return "Allow Accessibility so iPaste can paste directly into the app you are using."
         case .ready:
-            return "That's it. iPaste lives in the menu bar, top right, and starts watching the clipboard right away."
+            return "Copy something. Your history starts now."
         }
     }
 
-    /// The primary button label — the last step starts the app, it does not continue.
+    /// The last step starts the app instead of advancing.
     var primaryLabel: String {
-        self == .ready ? "Start using iPaste" : "Continue"
+        self == .ready ? "Get Started" : "Continue"
     }
 
     var next: OnboardingStep? { OnboardingStep(rawValue: rawValue + 1) }
