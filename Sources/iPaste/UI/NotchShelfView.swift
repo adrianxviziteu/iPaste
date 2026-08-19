@@ -83,8 +83,18 @@ struct NotchShelfView: View {
         return store.clips.first { $0.id == id }
     }
 
+    private var reminderClip: Clip? {
+        guard let id = app.shelfReminderClipID else { return nil }
+        return store.clips.first { $0.id == id }
+    }
+
     private var shelfHeight: CGFloat {
-        selectedClip == nil ? Theme.shelfHeight : Theme.shelfExpandedHeight
+        if reminderClip != nil { return Theme.shelfReminderHeight }
+        return selectedClip == nil ? Theme.shelfHeight : Theme.shelfExpandedHeight
+    }
+
+    private var shelfWidth: CGFloat {
+        reminderClip == nil ? Theme.shelfWidth : Theme.shelfReminderWidth
     }
 
     private var dayGroups: [ShelfDayGroup] {
@@ -101,29 +111,45 @@ struct NotchShelfView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if showsClearHistoryConfirmation {
-                clearHistoryRow
-                    .transition(.move(edge: .top).combined(with: .opacity))
+        Group {
+            if let reminderClip {
+                ShelfReminderPicker(
+                    clip: reminderClip,
+                    onCancel: { app.closeShelfReminderPicker() },
+                    onSave: { date in
+                        app.setReminder(.at(date), for: reminderClip)
+                        app.closeShelfReminderPicker()
+                    }
+                )
+                .padding(12)
+                .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)))
             } else {
-                searchRow
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            }
-            collectionsRow
-                .opacity(showsClearHistoryConfirmation ? 0.42 : 1)
-                .allowsHitTesting(!showsClearHistoryConfirmation)
-            cardsRow
-                .opacity(showsClearHistoryConfirmation ? 0.42 : 1)
-                .allowsHitTesting(!showsClearHistoryConfirmation)
-            if let selectedClip {
-                ShelfInspectorView(clip: selectedClip)
-                    .id(selectedClip.id)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                VStack(alignment: .leading, spacing: 12) {
+                    if showsClearHistoryConfirmation {
+                        clearHistoryRow
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    } else {
+                        searchRow
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                    collectionsRow
+                        .opacity(showsClearHistoryConfirmation ? 0.42 : 1)
+                        .allowsHitTesting(!showsClearHistoryConfirmation)
+                    cardsRow
+                        .opacity(showsClearHistoryConfirmation ? 0.42 : 1)
+                        .allowsHitTesting(!showsClearHistoryConfirmation)
+                    if let selectedClip {
+                        ShelfInspectorView(clip: selectedClip)
+                            .id(selectedClip.id)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                }
+                .padding(.top, 10)
+                .padding(.bottom, 16)
+                .transition(.opacity)
             }
         }
-        .padding(.top, 10)
-        .padding(.bottom, 16)
-        .frame(width: Theme.shelfWidth, height: shelfHeight, alignment: .top)
+        .frame(width: shelfWidth, height: shelfHeight, alignment: .top)
         .background(Color.black)
         .clipShape(BottomRoundedRectangle(radius: Theme.shelfCornerRadius))
         .overlay { dropOverlay }
@@ -140,6 +166,7 @@ struct NotchShelfView: View {
         )
         .animation(.spring(response: 0.3, dampingFraction: 0.84), value: showsClearHistoryConfirmation)
         .animation(.spring(response: 0.34, dampingFraction: 0.84), value: app.shelfInspectorClipID)
+        .animation(.spring(response: 0.34, dampingFraction: 0.84), value: app.shelfReminderClipID)
         .onDrop(of: [
             UTType.fileURL.identifier,
             UTType.image.identifier,
@@ -675,9 +702,12 @@ private struct ShelfInspectorView: View {
 
             Spacer(minLength: 8)
 
-            ClipReminderMenu(clip: clip)
-                .menuStyle(.borderlessButton)
-                .fixedSize()
+            inspectorButton(
+                clip.reminder == nil ? "bell" : "bell.fill",
+                help: clip.reminder == nil ? "Set reminder" : "Change reminder"
+            ) {
+                app.showShelfReminderPicker(for: clip)
+            }
 
             copyMenu
 
@@ -907,6 +937,196 @@ private struct ShelfInspectorView: View {
             "cmyk(\(Int(round(cyan * 100)))%, \(Int(round(magenta * 100)))%, \(Int(round(yellow * 100)))%, \(Int(round(key * 100)))%)",
             "hsl(\(Int(round(hue))), \(Int(round(saturation * 100)))%, \(Int(round(lightness * 100)))%)"
         )
+    }
+}
+
+/// The reminder editor lives inside the expanded notch instead of opening a
+/// second macOS window. This keeps the interaction attached to the selected clip.
+private struct ShelfReminderPicker: View {
+    let clip: Clip
+    let onCancel: () -> Void
+    let onSave: (Date) -> Void
+
+    @EnvironmentObject private var app: AppState
+    @State private var selectedDay: Date
+    @State private var hour: Int
+    @State private var minute: Int
+
+    private let calendar = Calendar.current
+
+    init(clip: Clip, onCancel: @escaping () -> Void, onSave: @escaping (Date) -> Void) {
+        self.clip = clip
+        self.onCancel = onCancel
+        self.onSave = onSave
+        let initial = clip.reminder?.fireDate ?? Date().addingTimeInterval(3_600)
+        let calendar = Calendar.current
+        _selectedDay = State(initialValue: calendar.startOfDay(for: initial))
+        _hour = State(initialValue: calendar.component(.hour, from: initial))
+        _minute = State(initialValue: calendar.component(.minute, from: initial) / 5 * 5)
+    }
+
+    var body: some View {
+        VStack(spacing: 10) {
+            header
+            dayStrip
+            timeRow
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 10) {
+            circleButton("xmark", action: onCancel)
+
+            Spacer()
+
+            VStack(spacing: 1) {
+                Text("Pick date & time")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white)
+                Text(clip.title)
+                    .font(.system(size: 8))
+                    .foregroundStyle(.white.opacity(0.38))
+                    .lineLimit(1)
+                    .frame(maxWidth: 260)
+            }
+
+            Spacer()
+
+            if clip.reminder != nil {
+                Button("Remove") {
+                    app.removeReminder(from: clip)
+                    onCancel()
+                }
+                .buttonStyle(.plain)
+                .font(.system(size: 9, weight: .medium))
+                .foregroundStyle(.red.opacity(0.85))
+            }
+
+            circleButton("checkmark", prominent: true) {
+                if let date = composedDate, date > Date() { onSave(date) }
+            }
+            .disabled(!isValid)
+            .opacity(isValid ? 1 : 0.35)
+        }
+        .frame(height: 28)
+    }
+
+    private var dayStrip: some View {
+        HStack(spacing: 6) {
+            ForEach(Array(days.enumerated()), id: \.offset) { index, day in
+                Button {
+                    withAnimation(.spring(response: 0.24, dampingFraction: 0.82)) {
+                        selectedDay = day
+                    }
+                } label: {
+                    VStack(spacing: 2) {
+                        Text(index == 0 ? "Today" : weekday(day))
+                            .font(.system(size: 7, weight: .medium))
+                            .foregroundStyle(.white.opacity(isSelected(day) ? 0.78 : 0.36))
+                        Text(day.formatted(.dateTime.day()))
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(
+                        isSelected(day)
+                            ? Color(red: 0.18, green: 0.45, blue: 1)
+                            : Color.black.opacity(0.28),
+                        in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(Color.white.opacity(isSelected(day) ? 0.18 : 0.07), lineWidth: 1)
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private var timeRow: some View {
+        HStack(spacing: 8) {
+            timeControl(value: hour, label: "HOUR", down: { hour = (hour + 23) % 24 }, up: { hour = (hour + 1) % 24 })
+
+            Text(":")
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.28))
+
+            timeControl(value: minute, label: "MINUTE", down: { minute = (minute + 55) % 60 }, up: { minute = (minute + 5) % 60 })
+        }
+    }
+
+    private func timeControl(
+        value: Int,
+        label: String,
+        down: @escaping () -> Void,
+        up: @escaping () -> Void
+    ) -> some View {
+        HStack(spacing: 0) {
+            Button(action: down) {
+                Image(systemName: "minus").frame(width: 38, height: 40)
+            }
+            .buttonStyle(.plain)
+
+            VStack(spacing: 0) {
+                Text(String(format: "%02d", value))
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                Text(label)
+                    .font(.system(size: 6, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.28))
+            }
+            .frame(maxWidth: .infinity)
+
+            Button(action: up) {
+                Image(systemName: "plus").frame(width: 38, height: 40)
+            }
+            .buttonStyle(.plain)
+        }
+        .font(.system(size: 9, weight: .semibold))
+        .foregroundStyle(.white.opacity(0.7))
+        .frame(maxWidth: .infinity)
+        .frame(height: 43)
+        .background(Color.black.opacity(0.28), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.07), lineWidth: 1)
+        }
+    }
+
+    private func circleButton(
+        _ symbol: String,
+        prominent: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(prominent ? .black : .white.opacity(0.62))
+                .frame(width: 27, height: 27)
+                .background(prominent ? Color.white : Color.white.opacity(0.08), in: Circle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var days: [Date] {
+        let today = calendar.startOfDay(for: Date())
+        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
+    }
+
+    private var composedDate: Date? {
+        calendar.date(bySettingHour: hour, minute: minute, second: 0, of: selectedDay)
+    }
+
+    private var isValid: Bool { composedDate.map { $0 > Date() } == true }
+
+    private func isSelected(_ day: Date) -> Bool {
+        calendar.isDate(day, inSameDayAs: selectedDay)
+    }
+
+    private func weekday(_ day: Date) -> String {
+        day.formatted(.dateTime.weekday(.narrow))
     }
 }
 

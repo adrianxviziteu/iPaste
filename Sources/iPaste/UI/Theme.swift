@@ -14,6 +14,8 @@ enum Theme {
     static let shelfWidth: CGFloat = 900
     static let shelfHeight: CGFloat = 252
     static let shelfExpandedHeight: CGFloat = 492
+    static let shelfReminderWidth: CGFloat = 430
+    static let shelfReminderHeight: CGFloat = 218
     static let shelfCardSize = CGSize(width: 148, height: 104)
     /// Vertical slack around a card so hover growth and the entrance slide are
     /// not clipped by the scroll view that holds them.
@@ -27,10 +29,10 @@ enum Theme {
     /// The first-run guide, in its own window.
     /// Taller than it looks like it needs: a row of controls sits under the text
     /// (shelf mode, permission, launch at login) and would push the footer off.
-    static let onboardingSize = CGSize(width: 620, height: 610)
+    static let onboardingSize = CGSize(width: 660, height: 650)
     /// Fixed height for the illustrations: otherwise title and buttons jump every step.
-    static let onboardingHeroHeight: CGFloat = 220
-    static let onboardingCornerRadius: CGFloat = 20
+    static let onboardingHeroHeight: CGFloat = 230
+    static let onboardingCornerRadius: CGFloat = 28
 
     /// A translucent backing, so a panel sits over content without hiding it.
     struct PanelBackground: View {

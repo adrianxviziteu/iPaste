@@ -23,23 +23,28 @@ struct OnboardingView: View {
             OnboardingCanvas()
 
             VStack(spacing: 0) {
-                HeroStage { hero }
-                    .padding(.top, 34)
+                OnboardingNotchBar(step: step)
+                    .padding(.top, 0)
 
-                VStack(spacing: 10) {
+                HeroStage { hero }
+                    .padding(.top, 20)
+
+                VStack(spacing: 11) {
                     Text(step.title)
-                        .font(.system(size: 22, weight: .semibold))
+                        .font(.system(size: 27, weight: .bold))
+                        .tracking(-0.7)
+                        .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
 
                     Text(step.subtitle)
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundStyle(.white.opacity(0.5))
                         .multilineTextAlignment(.center)
-                        .lineSpacing(2)
-                        .frame(maxWidth: 440)
+                        .lineSpacing(3)
+                        .frame(maxWidth: 470)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(.top, 24)
+                .padding(.top, 18)
                 .padding(.horizontal, 40)
 
                 Spacer(minLength: 12)
@@ -54,8 +59,11 @@ struct OnboardingView: View {
         .clipShape(RoundedRectangle(cornerRadius: Theme.onboardingCornerRadius, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: Theme.onboardingCornerRadius, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
+                .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
         }
+        .shadow(color: .black.opacity(0.6), radius: 40, y: 18)
+        .environment(\.colorScheme, .dark)
+        .tint(OnboardingStyle.accent)
         .animation(.spring(response: 0.38, dampingFraction: 0.86), value: step)
         .onAppear { hasPermission = app.paster.hasAccessibilityPermission(prompt: false) }
         // The window is borderless and the permission step blocks the way forward,
@@ -81,7 +89,7 @@ struct OnboardingView: View {
     // MARK: - Subsol
 
     private var footer: some View {
-        VStack(spacing: 18) {
+        VStack(spacing: 16) {
             controls
 
             HStack {
@@ -107,8 +115,16 @@ struct OnboardingView: View {
                 .opacity(isBlocked ? 0.4 : 1)
                 .help(isBlocked ? "Grant Accessibility access to continue" : "")
             }
-            .padding(.horizontal, 28)
-            .padding(.bottom, 24)
+            .padding(.horizontal, 30)
+            .padding(.bottom, 22)
+        }
+        .padding(.top, 12)
+        .background {
+            LinearGradient(
+                colors: [Color.white.opacity(0.035), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
         }
     }
 
@@ -130,8 +146,8 @@ struct OnboardingView: View {
                 EmptyView()
             }
         }
-        .padding(.horizontal, 28)
-        .frame(height: 104)
+        .padding(.horizontal, 30)
+        .frame(height: 100)
     }
 
     // MARK: - Illustrations

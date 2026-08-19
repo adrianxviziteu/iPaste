@@ -296,142 +296,119 @@ struct ShelfHero: View {
 
 // MARK: - 5. Library
 
-/// A mockup of the full window: the same three columns as `LibraryView`.
+/// The current product has no separate Library window. Selection expands the
+/// notch itself and reveals the contextual inspector under the card shelf.
 struct LibraryHero: View {
     var body: some View {
-        HStack(spacing: 0) {
-            sidebar
-            Divider().opacity(0.5)
-            grid
-            Divider().opacity(0.5)
-            inspector
-        }
-        .frame(width: 386, height: 186)
-        .overlay(alignment: .top) { titleBar }
-        .mockChrome()
-    }
-
-    private var titleBar: some View {
-        HStack(spacing: 5) {
-            ForEach(0..<3, id: \.self) { _ in
-                Circle().fill(Color.primary.opacity(0.16)).frame(width: 6, height: 6)
-            }
-            Spacer()
-            Text("iPaste Library")
-                .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(.secondary)
-            Spacer()
-            Color.clear.frame(width: 28, height: 1)
-        }
-        .padding(.horizontal, 9)
-        .frame(height: 22)
-    }
-
-    private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            label("LIBRARY")
-            item("tray.full", "All", selected: true)
-            item("pin", "Pinned")
-            label("COLLECTIONS")
-            item("folder", "Design")
-            item("folder", "Snippets")
-        }
-        .padding(.horizontal, 7)
-        .padding(.top, 27)
-        .frame(width: 96, alignment: .top)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .background(OnboardingStyle.surface)
-    }
-
-    private func label(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 7, weight: .semibold))
-            .foregroundStyle(.tertiary)
-            .padding(.top, 6)
-            .padding(.leading, 4)
-    }
-
-    private func item(_ symbol: String, _ title: String, selected: Bool = false) -> some View {
-        HStack(spacing: 5) {
-            Image(systemName: symbol)
-                .font(.system(size: 8))
-                .foregroundStyle(.secondary)
-                .frame(width: 10)
-            Text(title)
-                .font(.system(size: 9))
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 5)
-        .frame(height: 17)
-        .background {
-            RoundedRectangle(cornerRadius: 4, style: .continuous)
-                .fill(selected ? Color.accentColor.opacity(0.16) : .clear)
-        }
-    }
-
-    private var grid: some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 5) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 8))
-                    .foregroundStyle(.tertiary)
-                Text("Search the library…")
+                    .foregroundStyle(.white.opacity(0.34))
+                Text("Search…")
                     .font(.system(size: 8))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.white.opacity(0.34))
                 Spacer(minLength: 0)
+                Circle().fill(Color.white.opacity(0.1)).frame(width: 16, height: 16)
+                Circle().fill(Color.white.opacity(0.1)).frame(width: 16, height: 16)
             }
-            .padding(.horizontal, 9)
-            .frame(height: 25)
+            .padding(.horizontal, 3)
 
-            Divider().opacity(0.5)
+            HStack(spacing: 7) {
+                card("#1D6FE0", color: OnboardingStyle.accent, selected: true)
+                card("Invoice #2291", symbol: "text.alignleft")
+                card("Receipt.png", symbol: "photo")
+                card("stripe.com", symbol: "link")
+            }
 
-            LazyVGrid(
-                columns: Array(repeating: GridItem(.fixed(54), spacing: 6), count: 3),
-                spacing: 6
-            ) {
-                ForEach(0..<6, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 5, style: .continuous)
-                        .fill(OnboardingStyle.surface)
-                        .frame(height: 42)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 5, style: .continuous)
-                                .strokeBorder(
-                                    index == 1 ? Color.accentColor.opacity(0.7) : OnboardingStyle.hairline,
-                                    lineWidth: 1
-                                )
-                        }
+            VStack(alignment: .leading, spacing: 7) {
+                HStack {
+                    Label("Color", systemImage: "paintpalette")
+                        .font(.system(size: 8, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.58))
+                    Spacer()
+                    Text("HEX")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.3))
+                    Text("#1D6FE0")
+                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(.white.opacity(0.82))
+                    ForEach(["bell", "doc.on.doc", "xmark"], id: \.self) { symbol in
+                        Image(systemName: symbol)
+                            .font(.system(size: 7, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.65))
+                            .frame(width: 18, height: 18)
+                            .background(Color.white.opacity(0.08), in: Circle())
+                    }
+                }
+
+                HStack(spacing: 9) {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(OnboardingStyle.accent)
+                        .frame(width: 155, height: 48)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        value("RGB", "rgb(29, 111, 224)")
+                        value("HSL", "hsl(214, 77%, 50%)")
+                    }
+                    Spacer()
                 }
             }
             .padding(9)
-
-            Spacer(minLength: 0)
+            .background(Color.white.opacity(0.052), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.09), lineWidth: 1)
+            }
         }
-        .padding(.top, 22)
-        .frame(width: 194)
+        .padding(12)
+        .frame(width: 420, height: 210, alignment: .top)
+        .background(Color.black)
+        .clipShape(BottomRoundedRectangle(radius: 20))
+        .overlay {
+            BottomRoundedRectangle(radius: 20)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.48), radius: 22, y: 12)
     }
 
-    private var inspector: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            RoundedRectangle(cornerRadius: 5, style: .continuous)
-                .fill(OnboardingStyle.surface)
-                .frame(height: 48)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 5, style: .continuous)
-                        .strokeBorder(OnboardingStyle.hairline, lineWidth: 1)
+    private func card(_ title: String, symbol: String? = nil, color: Color? = nil, selected: Bool = false) -> some View {
+        RoundedRectangle(cornerRadius: 8, style: .continuous)
+            .fill(color ?? Color.white.opacity(0.065))
+            .frame(width: 92, height: 54)
+            .overlay {
+                if let symbol {
+                    Image(systemName: symbol)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.white.opacity(0.45))
                 }
-
-            ForEach(0..<4, id: \.self) { line in
-                Capsule()
-                    .fill(Color.primary.opacity(line == 0 ? 0.20 : 0.09))
-                    .frame(width: [70, 58, 62, 42][line], height: 4)
             }
+            .overlay(alignment: .bottomLeading) {
+                Text(title)
+                    .font(.system(size: 7, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.78))
+                    .lineLimit(1)
+                    .padding(6)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(
+                        selected ? OnboardingStyle.accent : Color.white.opacity(0.08),
+                        lineWidth: selected ? 2 : 1
+                    )
+            }
+    }
 
-            Spacer(minLength: 0)
+    private func value(_ label: String, _ text: String) -> some View {
+        HStack(spacing: 7) {
+            Text(label)
+                .font(.system(size: 6, weight: .bold))
+                .foregroundStyle(.white.opacity(0.28))
+                .frame(width: 23, alignment: .leading)
+            Text(text)
+                .font(.system(size: 7, weight: .medium, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.65))
         }
-        .padding(.horizontal, 9)
-        .padding(.top, 27)
-        .padding(.bottom, 10)
-        .frame(width: 94, alignment: .leading)
     }
 }
 

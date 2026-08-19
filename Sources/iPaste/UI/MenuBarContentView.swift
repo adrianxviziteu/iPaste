@@ -8,31 +8,11 @@ struct MenuBarContentView: View {
     @EnvironmentObject private var store: ClipStore
 
     private var recent: [Clip] {
-        Array(store.orderedClips.prefix(8))
+        Array(store.orderedClips.prefix(5))
     }
 
     var body: some View {
         Group {
-            Button("Quick Search…") { app.showQuickSearch() }
-                .keyboardShortcut("v", modifiers: [.control, .command])
-
-            Button("Quick Note…") { app.showQuickNotes() }
-                .keyboardShortcut("n", modifiers: [.control, .command])
-
-            Button("Clipboard Library…") { app.showLibrary() }
-                .keyboardShortcut("l", modifiers: [.control, .command])
-
-            Button("Capture Selected Text") { app.captureSelectedText() }
-            Button("Color Picker…") { app.pickColor() }
-
-            Button(app.isShelfVisible ? "Hide Shelf" : "Show Shelf") { app.toggleShelf() }
-                .keyboardShortcut("s", modifiers: [.control, .command])
-
-            Divider()
-
-            Button("Settings…") { app.showSettings() }
-                .keyboardShortcut(",", modifiers: [.command])
-
             if recent.isEmpty {
                 Text("No clips yet")
             } else {
@@ -45,11 +25,26 @@ struct MenuBarContentView: View {
 
             Divider()
 
-            Button("Show Guide…") { app.showOnboarding() }
+            Button("Quick Search…") { app.showQuickSearch() }
+                .keyboardShortcut("v", modifiers: [.control, .command])
+
+            Button(app.isShelfVisible ? "Hide Shelf" : "Show Shelf") { app.toggleShelf() }
+                .keyboardShortcut("s", modifiers: [.control, .command])
+
+            Menu("Tools") {
+                Button("Quick Note…") { app.showQuickNotes() }
+                    .keyboardShortcut("n", modifiers: [.control, .command])
+                Button("Capture Selected Text") { app.captureSelectedText() }
+                Button("Color Picker…") { app.pickColor() }
+                Divider()
+                Button("Show Guide…") { app.showOnboarding() }
+            }
+
+            Button("Settings…") { app.showSettings() }
+                .keyboardShortcut(",", modifiers: [.command])
 
             Divider()
 
-            Button("Clear History") { store.clearHistory() }
             Button("Quit iPaste") { NSApp.terminate(nil) }
                 .keyboardShortcut("q")
         }

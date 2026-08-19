@@ -15,7 +15,7 @@ struct ShelfModePicker: View {
         VStack(spacing: 8) {
             Text("When should the shelf appear?")
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.48))
 
             HStack(spacing: 6) {
                 ForEach(ShelfMode.allCases) { mode in
@@ -39,16 +39,17 @@ struct ShelfModePicker: View {
                     .font(.system(size: 10))
                     .opacity(0.7)
             }
-            .foregroundStyle(isActive ? Color.white : Color.primary)
+            .foregroundStyle(isActive ? Color.white : Color.white.opacity(0.7))
             .frame(width: 128, height: 44)
             .background {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
-                    .fill(isActive ? Color.accentColor : Color.primary.opacity(0.06))
+                    .fill(isActive ? OnboardingStyle.accent : Color.white.opacity(0.055))
             }
             .overlay {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(isActive ? 0 : 0.08), lineWidth: 1)
+                    .strokeBorder(Color.white.opacity(isActive ? 0.16 : 0.08), lineWidth: 1)
             }
+            .shadow(color: isActive ? OnboardingStyle.accent.opacity(0.2) : .clear, radius: 10, y: 4)
         }
         .buttonStyle(.plain)
     }
@@ -90,14 +91,14 @@ struct AccessibilityControl: View {
             if granted {
                 Text("iPaste can now paste into the active app.")
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.48))
             } else {
                 Button("Open System Settings…", action: onRequest)
                     .buttonStyle(OnboardingQuietStyle(prominent: true))
 
                 Text("Skip it and iPaste still works — it puts the clip on the clipboard and you press ⌘V.")
                     .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.white.opacity(0.32))
                     .multilineTextAlignment(.center)
                     .frame(width: 380)
             }
@@ -119,7 +120,8 @@ struct AccessibilityControl: View {
         }
         .padding(.horizontal, 12)
         .frame(height: 28)
-        .background(Capsule().fill(Color.primary.opacity(0.07)))
+        .background(Capsule().fill(Color.white.opacity(0.07)))
+        .overlay { Capsule().strokeBorder(Color.white.opacity(0.08), lineWidth: 1) }
     }
 }
 

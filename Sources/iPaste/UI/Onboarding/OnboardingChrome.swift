@@ -8,12 +8,14 @@ import SwiftUI
 /// a single accent. Color that says nothing is left out: in a guide, every
 /// colored patch that does not mark something is noise.
 enum OnboardingStyle {
+    static let accent = Color(red: 0.16, green: 0.43, blue: 1.0)
+    static let canvas = Color(red: 0.018, green: 0.022, blue: 0.032)
     /// A mockup surface — a card, a panel, a row.
-    static let surface = Color.primary.opacity(0.045)
+    static let surface = Color.white.opacity(0.055)
     /// The same surface, one step raised.
-    static let raised = Color.primary.opacity(0.075)
+    static let raised = Color.white.opacity(0.09)
     /// The outline, as thin as the display allows.
-    static let hairline = Color.primary.opacity(0.10)
+    static let hairline = Color.white.opacity(0.11)
 }
 
 /// The window backdrop: the system window color, nothing more. The window is
@@ -21,7 +23,66 @@ enum OnboardingStyle {
 /// decorated as well.
 struct OnboardingCanvas: View {
     var body: some View {
-        Color(nsColor: .windowBackgroundColor)
+        ZStack {
+            OnboardingStyle.canvas
+            RadialGradient(
+                colors: [OnboardingStyle.accent.opacity(0.13), .clear],
+                center: .top,
+                startRadius: 0,
+                endRadius: 360
+            )
+            LinearGradient(
+                colors: [.white.opacity(0.025), .clear],
+                startPoint: .top,
+                endPoint: .center
+            )
+        }
+    }
+}
+
+/// A compact product bar shaped like the closed notch. It anchors every step
+/// to the place where iPaste actually lives.
+struct OnboardingNotchBar: View {
+    let step: OnboardingStep
+
+    var body: some View {
+        HStack(spacing: 9) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(OnboardingStyle.accent)
+                Image(systemName: "doc.on.clipboard.fill")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .frame(width: 28, height: 28)
+            .shadow(color: OnboardingStyle.accent.opacity(0.35), radius: 9)
+
+            Text("iPaste")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.white)
+
+            Spacer(minLength: 18)
+
+            Text("NOTCH CLIPBOARD")
+                .font(.system(size: 7, weight: .bold))
+                .tracking(1.2)
+                .foregroundStyle(.white.opacity(0.35))
+
+            Text("\(step.rawValue + 1)/\(OnboardingStep.allCases.count)")
+                .font(.system(size: 9, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.5))
+                .padding(.horizontal, 8)
+                .frame(height: 22)
+                .background(Color.white.opacity(0.08), in: Capsule())
+        }
+        .padding(.horizontal, 10)
+        .frame(width: 330, height: 46)
+        .background(Color.black, in: BottomRoundedRectangle(radius: 15))
+        .overlay {
+            BottomRoundedRectangle(radius: 15)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.55), radius: 20, y: 10)
     }
 }
 
@@ -35,7 +96,7 @@ struct KeyCap: View {
     var body: some View {
         Text(label)
             .font(.system(size: size, weight: .medium, design: .rounded))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(.white.opacity(0.64))
             .frame(minWidth: size + 11, minHeight: size + 9)
             .padding(.horizontal, 4)
             .background {
@@ -65,7 +126,7 @@ struct ShortcutLine: View {
 
             Text(caption)
                 .font(.system(size: 12))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.5))
         }
     }
 }
@@ -79,12 +140,14 @@ struct OnboardingPrimaryStyle: ButtonStyle {
         configuration.label
             .font(.system(size: 13, weight: .medium))
             .foregroundStyle(.white)
-            .padding(.horizontal, 16)
-            .frame(height: 28)
+            .padding(.horizontal, 20)
+            .frame(height: 36)
             .background {
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(Color.accentColor.opacity(configuration.isPressed ? 0.8 : 1))
+                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    .fill(OnboardingStyle.accent.opacity(configuration.isPressed ? 0.78 : 1))
             }
+            .shadow(color: OnboardingStyle.accent.opacity(0.24), radius: 12, y: 5)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .contentShape(Rectangle())
     }
 }
@@ -96,14 +159,14 @@ struct OnboardingQuietStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: prominent ? .medium : .regular))
-            .foregroundStyle(prominent ? Color.primary : Color.secondary)
+            .foregroundStyle(prominent ? Color.white : Color.white.opacity(0.48))
             .padding(.horizontal, prominent ? 14 : 8)
-            .frame(height: 28)
+            .frame(height: 36)
             .background {
                 if prominent {
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
                         .fill(OnboardingStyle.surface)
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
                         .strokeBorder(OnboardingStyle.hairline, lineWidth: 1)
                 }
             }
@@ -124,10 +187,10 @@ struct StepDots: View {
     var body: some View {
         HStack(spacing: 5) {
             ForEach(steps) { step in
-                Circle()
-                    .fill(step == current ? Color.primary.opacity(0.55) : Color.primary.opacity(0.15))
-                    .frame(width: 5, height: 5)
-                    .contentShape(Circle().inset(by: -6))
+                Capsule()
+                    .fill(step == current ? OnboardingStyle.accent : Color.white.opacity(0.15))
+                    .frame(width: step == current ? 18 : 5, height: 5)
+                    .contentShape(Capsule().inset(by: -6))
                     .onTapGesture { onSelect(step) }
             }
         }
@@ -157,20 +220,20 @@ struct HeroStage<Content: View>: View {
 /// corner. Every illustration uses it, so they read as one family rather than
 /// seven separate drawings.
 struct MockChrome: ViewModifier {
-    var cornerRadius: CGFloat = 10
+    var cornerRadius: CGFloat = 14
 
     func body(content: Content) -> some View {
         content
             .background {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(Color(nsColor: .controlBackgroundColor))
+                    .fill(Color.black.opacity(0.72))
             }
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .strokeBorder(OnboardingStyle.hairline, lineWidth: 1)
             }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
+            .shadow(color: .black.opacity(0.42), radius: 20, y: 10)
     }
 }
 

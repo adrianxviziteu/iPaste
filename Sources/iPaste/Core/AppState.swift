@@ -33,6 +33,7 @@ final class AppState: ObservableObject {
 
     @Published var isShelfVisible = false
     @Published var shelfInspectorClipID: UUID?
+    @Published var shelfReminderClipID: UUID?
     /// True while an external item is being dragged over the notch shelf.
     @Published var isDropTargeted = false
     /// The clip the capture pill is currently announcing; nil while it is away.
@@ -676,6 +677,7 @@ final class AppState: ObservableObject {
     }
 
     func showShelfInspector(for clip: Clip) {
+        shelfReminderClipID = nil
         shelfInspectorClipID = clip.id
         resizeShelf(expanded: true)
     }
@@ -685,9 +687,25 @@ final class AppState: ObservableObject {
         resizeShelf(expanded: false)
     }
 
+    func showShelfReminderPicker(for clip: Clip) {
+        shelfInspectorClipID = nil
+        shelfReminderClipID = clip.id
+        resizeShelf(width: Theme.shelfReminderWidth, height: Theme.shelfReminderHeight)
+    }
+
+    /// Returns to the selected clip inspector, so closing the reminder editor
+    /// does not throw the user back to the top-level shelf.
+    func closeShelfReminderPicker() {
+        guard let clipID = shelfReminderClipID else { return }
+        shelfReminderClipID = nil
+        shelfInspectorClipID = clipID
+        resizeShelf(width: Theme.shelfWidth, height: Theme.shelfExpandedHeight)
+    }
+
     func hideShelf() {
         isDropTargeted = false
         shelfInspectorClipID = nil
+        shelfReminderClipID = nil
         guard let panel = shelfPanel else {
             isShelfVisible = false
             return
@@ -710,8 +728,14 @@ final class AppState: ObservableObject {
     /// The window itself never moves — the content does the sliding.
     private func positionShelf(_ panel: NSPanel) {
         guard let screen = NSScreen.main else { return }
-        let width = min(Theme.shelfWidth, screen.frame.width - 40)
-        let height = shelfInspectorClipID == nil ? Theme.shelfHeight : Theme.shelfExpandedHeight
+        let preferredWidth = shelfReminderClipID == nil ? Theme.shelfWidth : Theme.shelfReminderWidth
+        let width = min(preferredWidth, screen.frame.width - 40)
+        let height: CGFloat
+        if shelfReminderClipID != nil {
+            height = Theme.shelfReminderHeight
+        } else {
+            height = shelfInspectorClipID == nil ? Theme.shelfHeight : Theme.shelfExpandedHeight
+        }
         panel.setContentSize(NSSize(width: width, height: height))
         panel.setFrameOrigin(NSPoint(
             x: screen.frame.midX - width / 2,
@@ -720,12 +744,18 @@ final class AppState: ObservableObject {
     }
 
     private func resizeShelf(expanded: Bool) {
+        resizeShelf(
+            width: Theme.shelfWidth,
+            height: expanded ? Theme.shelfExpandedHeight : Theme.shelfHeight
+        )
+    }
+
+    private func resizeShelf(width preferredWidth: CGFloat, height: CGFloat) {
         guard let panel = shelfPanel, panel.isVisible,
               let screen = NSScreen.screens.first(where: { $0.frame.intersects(panel.frame) }) ?? NSScreen.main
         else { return }
 
-        let width = min(Theme.shelfWidth, screen.frame.width - 40)
-        let height = expanded ? Theme.shelfExpandedHeight : Theme.shelfHeight
+        let width = min(preferredWidth, screen.frame.width - 40)
         let frame = NSRect(
             x: screen.frame.midX - width / 2,
             y: screen.frame.maxY - height,
