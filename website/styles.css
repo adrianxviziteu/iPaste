@@ -1422,3 +1422,8 @@ img.app-icon{background:none;box-shadow:none;border-radius:0}
   .faq{padding-bottom:30px}
   .download-inner{padding:58px 14px 60px;border-radius:32px 32px 0 0}
 }
+
+/* Keep the desktop laptop overlap visual, but leave the intro heading clear. */
+@media(min-width:851px){
+  .image-macbook{margin-bottom:-48px}
+}
