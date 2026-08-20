@@ -154,3 +154,5 @@ document.addEventListener('keydown', (event) => {
     setNotchShelf(false, false);
   }
 });
+
+document.querySelectorAll('.download-arrow').forEach((arrow) => arrow.remove());

@@ -168,7 +168,7 @@ h1 em,h2 em,h3 em,.hero h1 em,.intro h2 em,.feature-panel h2 em,.audiences h2 em
 .nav-links a{font-size:13px}.download-pill{font-size:12px}
 .hero-content>p{max-width:640px;font-size:18px}
 .hero-button{min-height:50px;padding:15px 24px;font-size:14px}
-.download-arrow{font:600 15px var(--mono);line-height:1}
+.download-arrow{display:none}.apple-logo{width:.82em;height:1em;flex-shrink:0;fill:currentColor}
 .hero-meta{font-size:11px}
 .award-row{font-size:11px}
 .intro>p{max-width:690px;font-size:18px;line-height:1.62}
@@ -186,8 +186,8 @@ h1 em,h2 em,h3 em,.hero h1 em,.intro h2 em,.feature-panel h2 em,.audiences h2 em
 @media(max-width:850px){.floating-nav,.floating-nav.is-scrolled{top:0}}
 
 /* Full-width responsive footer wordmark */
-.footer-word{width:100%;max-width:none;margin:0;padding:0 1.5vw;overflow:hidden;color:#111215;font-size:clamp(120px,43vw,720px);font-weight:700;line-height:.68;letter-spacing:-.085em;text-align:center;white-space:nowrap}
-@media(max-width:600px){.footer-word{padding:0 2vw;font-size:43vw;line-height:.72;letter-spacing:-.08em}}
+.footer-word{width:100%;max-width:100%;margin:0;padding:0 1.5vw;overflow:hidden;color:#111215;font-size:clamp(120px,40vw,680px);font-weight:700;line-height:.68;letter-spacing:-.085em;text-align:center;white-space:nowrap}
+@media(max-width:600px){.footer-word{padding:0 2vw;font-size:40vw;line-height:.72;letter-spacing:-.08em}}
 
 /* Premium depth: fine material texture, local notch light, realistic surfaces */
 body{background:#fbfbfa}
@@ -249,3 +249,7 @@ body:after{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;opa
 @media(max-width:850px){.hero{overflow-clip-margin:58px}.hero-shelf{bottom:-42px}.intro{padding-top:96px}.shelf-continuation{margin-top:-46px}}
 @media(max-width:600px){.hero{overflow-clip-margin:52px}.hero:after{bottom:-4%;height:36%}.hero-shelf{bottom:-30px}.intro{padding-top:82px}.shelf-continuation{height:58px;margin:-38px auto 27px;gap:7px}.continuation-line{height:28px}.shelf-continuation+.award-row{margin-bottom:35px}}
 @media(prefers-reduced-motion:reduce){.hero-shelf{transform:translateX(-50%);will-change:auto}}
+
+/* Decorative hero glows extend beyond the viewport by design, but must not
+   create a horizontal page scrollbar. */
+html,body{overflow-x:hidden}
