@@ -26,6 +26,7 @@ screen.
 
 - [Status](#status)
 - [Running it](#running-it)
+- [Installing with Homebrew](#installing-with-homebrew)
 - [Publishing a download](#publishing-a-download)
 - [Stable signing](#stable-signing)
 - [Shortcuts](#shortcuts)
@@ -71,6 +72,21 @@ v1 — the working core. Built with SwiftUI and SwiftPM, without Xcode.
 
 The script compiles, assembles `iPaste.app` and signs it ad-hoc. The app has no
 Dock icon — look for it in the menu bar, top right.
+
+## Installing with Homebrew
+
+Install the latest tagged release with Homebrew Cask:
+
+```bash
+brew install --cask https://raw.githubusercontent.com/adrianxviziteu/iPaste/main/Casks/ipaste.rb
+```
+
+This installs `iPaste.app` in `/Applications`. The cask currently points to
+the published `v0.1.0` release. When publishing a new tagged release, update
+the `version` in `Casks/ipaste.rb` to keep the Homebrew installation current.
+Because the release is not Apple-notarized yet, macOS may require you to
+right-click the app and choose **Open** on its first launch. iPaste also needs
+Accessibility permission to paste into the application you are using.
 
 ## Publishing a download
 

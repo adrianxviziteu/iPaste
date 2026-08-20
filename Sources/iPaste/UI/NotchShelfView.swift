@@ -166,8 +166,7 @@ struct NotchShelfView: View {
             }
         }
         .frame(width: shelfWidth, height: shelfHeight, alignment: .top)
-        .background(Color.black)
-        .clipShape(BottomRoundedRectangle(radius: Theme.shelfCornerRadius))
+        .shelfChrome()
         .overlay { dropOverlay }
         .environment(\.colorScheme, .dark)
         // The window stays put and only the content moves, so the animation is
@@ -309,11 +308,7 @@ struct NotchShelfView: View {
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(active ? .black : (tint ?? .white.opacity(0.75)))
                 .frame(width: 32, height: 32)
-                .background(
-                    active ? Color.white
-                           : (tint?.opacity(0.16) ?? Color.white.opacity(0.09)),
-                    in: Circle()
-                )
+                .circleButtonBackground(active: active, tint: tint)
         }
         .buttonStyle(.plain)
         .help(help)
@@ -683,11 +678,7 @@ private struct ShelfInspectorView: View {
         }
         .padding(12)
         .frame(height: 218)
-        .background(Color.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.11), lineWidth: 1)
-        }
+        .inspectorChrome()
         .padding(.horizontal, 18)
     }
 
@@ -698,7 +689,7 @@ private struct ShelfInspectorView: View {
                 .foregroundStyle(.white.opacity(0.68))
                 .padding(.horizontal, 8)
                 .frame(height: 24)
-                .background(Color.white.opacity(0.08), in: Capsule())
+                .glassPill()
 
             if let category = clip.category {
                 Text(category)
@@ -706,7 +697,7 @@ private struct ShelfInspectorView: View {
                     .foregroundStyle(.white.opacity(0.58))
                     .padding(.horizontal, 8)
                     .frame(height: 24)
-                    .background(Color.white.opacity(0.07), in: Capsule())
+                    .glassPill()
             }
 
             if isTextual {
@@ -755,7 +746,7 @@ private struct ShelfInspectorView: View {
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.72))
                 .frame(width: 26, height: 26)
-                .background(Color.white.opacity(0.08), in: Circle())
+                .circleButtonBackground(active: false, tint: nil)
         }
         .buttonStyle(.plain)
         .help(help)
@@ -788,7 +779,7 @@ private struct ShelfInspectorView: View {
                 .foregroundStyle(.white.opacity(0.82))
                 .padding(.horizontal, 9)
                 .frame(height: 26)
-                .background(Color.white.opacity(0.1), in: Capsule())
+                .glassPill()
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
@@ -1570,5 +1561,95 @@ struct ShelfCard: View {
                 ?? NSItemProvider(object: clip.text as NSString)
         }
         return NSItemProvider(object: clip.text as NSString)
+    }
+}
+
+private extension View {
+    /// The shelf's own backing: real glass on macOS 26+, the original solid
+    /// black everywhere else.
+    ///
+    /// A light tint, not a solid one — a full black tint reads as tinted
+    /// plastic and hides the actual glass refraction of the desktop behind
+    /// it. The rim gradient is the same top-lit highlight Apple draws around
+    /// its own glass (Control Center, the notch), so the edge still catches
+    /// light even in a static screenshot.
+    @ViewBuilder
+    func shelfChrome() -> some View {
+        if #available(macOS 26.0, *) {
+            glassEffect(.regular.tint(.black.opacity(0.45)), in: BottomRoundedRectangle(radius: Theme.shelfCornerRadius))
+                .overlay {
+                    BottomRoundedRectangle(radius: Theme.shelfCornerRadius)
+                        .stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.32), .white.opacity(0.04)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 1
+                        )
+                }
+                // glassEffect only shapes the backing, not the content in front of
+                // it — without this, scrolling cards/rows square off past the
+                // rounded corners instead of being cut by them.
+                .clipShape(BottomRoundedRectangle(radius: Theme.shelfCornerRadius))
+        } else {
+            background(Color.black)
+                .clipShape(BottomRoundedRectangle(radius: Theme.shelfCornerRadius))
+        }
+    }
+
+    /// The small round icon buttons in the shelf's toolbar row.
+    @ViewBuilder
+    func circleButtonBackground(active: Bool, tint: Color?) -> some View {
+        if #available(macOS 26.0, *) {
+            glassEffect(
+                active ? .regular.tint(.white).interactive() : .regular.interactive(),
+                in: .circle
+            )
+        } else {
+            background(
+                active ? Color.white : (tint?.opacity(0.16) ?? Color.white.opacity(0.09)),
+                in: Circle()
+            )
+        }
+    }
+
+    /// The clip inspector panel: untinted glass, deliberately lighter than the
+    /// shelf it sits on so the two surfaces read as distinct panes of glass
+    /// instead of one flat black slab.
+    @ViewBuilder
+    func inspectorChrome() -> some View {
+        if #available(macOS 26.0, *) {
+            glassEffect(.regular, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.28), .white.opacity(0.06)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 1
+                        )
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        } else {
+            background(Color.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(Color.white.opacity(0.11), lineWidth: 1)
+                }
+        }
+    }
+
+    /// A small glass capsule pill, for the badges and buttons scattered
+    /// across the shelf's inspector toolbar.
+    @ViewBuilder
+    func glassPill() -> some View {
+        if #available(macOS 26.0, *) {
+            glassEffect(.regular, in: .capsule)
+        } else {
+            background(Color.white.opacity(0.08), in: Capsule())
+        }
     }
 }

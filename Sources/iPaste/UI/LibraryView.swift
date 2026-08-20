@@ -304,7 +304,7 @@ struct LibraryView: View {
 
                     HStack(spacing: 8) {
                         Button("Paste") { app.paste(clip) }
-                            .buttonStyle(.borderedProminent)
+                            .primaryActionStyle()
                         Button("Copy") { app.copy(clip) }
                         Spacer()
                         Button {

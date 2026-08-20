@@ -1,20 +1,9 @@
 {
   "rewrites": [
-    {
-      "source": "/assets/:path*",
-      "destination": "/website/assets/:path*"
-    },
-    {
-      "source": "/styles.css",
-      "destination": "/website/styles.css"
-    },
-    {
-      "source": "/script.js",
-      "destination": "/website/script.js"
-    },
-    {
-      "source": "/",
-      "destination": "/website/index.html"
-    }
+    { "source": "/", "destination": "/website/index.html" },
+    { "source": "/styles.css", "destination": "/website/styles.css" },
+    { "source": "/script.js", "destination": "/website/script.js" },
+    { "source": "/privacy.html", "destination": "/website/privacy.html" },
+    { "source": "/terms.html", "destination": "/website/terms.html" }
   ]
 }

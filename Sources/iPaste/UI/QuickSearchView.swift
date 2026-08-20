@@ -61,7 +61,7 @@ struct QuickSearchView: View {
 
     private var filterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
+            glassChipRow {
                 filterChip(title: "All", kind: nil)
                 ForEach(ClipKind.allCases, id: \.self) { kind in
                     filterChip(title: kind.label, kind: kind)
@@ -79,6 +79,19 @@ struct QuickSearchView: View {
         }
     }
 
+    /// Groups the filter pills into one glass sampling region on macOS 26+, so
+    /// nearby chips read as a single surface instead of independent blobs.
+    @ViewBuilder
+    private func glassChipRow(@ViewBuilder content: () -> some View) -> some View {
+        if #available(macOS 26.0, *) {
+            GlassEffectContainer(spacing: 6) {
+                HStack(spacing: 6, content: content)
+            }
+        } else {
+            HStack(spacing: 6, content: content)
+        }
+    }
+
     private func filterChip(title: String, kind: ClipKind?) -> some View {
         let isActive = kindFilter == kind
         return Button {
@@ -91,9 +104,7 @@ struct QuickSearchView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(
-                Capsule().fill(isActive ? Color.accentColor.opacity(0.9) : Color.primary.opacity(0.06))
-            )
+            .chipBackground(isActive: isActive)
             .foregroundStyle(isActive ? Color.white : Color.primary)
         }
         .buttonStyle(.plain)
@@ -112,9 +123,7 @@ struct QuickSearchView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(
-                Capsule().fill(isActive ? Color.accentColor.opacity(0.9) : Color.primary.opacity(0.06))
-            )
+            .chipBackground(isActive: isActive)
             .foregroundStyle(isActive ? Color.white : Color.primary)
         }
         .buttonStyle(.plain)
@@ -213,5 +222,23 @@ struct QuickSearchView: View {
     private func activateSelection(inverted: Bool = false) {
         guard selectedIndex < results.count else { return }
         app.activate(results[selectedIndex], inverted: inverted)
+    }
+}
+
+private extension View {
+    /// Filter-pill backing: real glass on macOS 26+, the original tinted
+    /// capsule fill everywhere else.
+    @ViewBuilder
+    func chipBackground(isActive: Bool) -> some View {
+        if #available(macOS 26.0, *) {
+            glassEffect(
+                isActive ? .regular.tint(.accentColor.opacity(0.9)) : .regular,
+                in: .capsule
+            )
+        } else {
+            background(
+                Capsule().fill(isActive ? Color.accentColor.opacity(0.9) : Color.primary.opacity(0.06))
+            )
+        }
     }
 }

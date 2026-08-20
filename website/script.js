@@ -1,3 +1,299 @@
+// Every string the site shows lives here, so English and Romanian stay in sync
+// and the markup keeps only its default copy. Elements opt in with data-i18n
+// (inner HTML), data-i18n-aria (aria-label) or data-i18n-alt (image alt).
+const translations = {
+  en: {
+    'meta.title': 'Nocket: Keep the good stuff in reach.',
+    'meta.description': 'Nocket turns your MacBook notch into a fast, visual clipboard shelf.',
+
+    'nav.idea': 'The idea',
+    'nav.inside': 'Inside Nocket',
+    'nav.faq': 'FAQ',
+    'nav.langAria': 'Switch language',
+    'nav.download': 'Download',
+    'nav.downloadMac': 'Download for macOS',
+    'nav.menu': 'Menu',
+    'nav.closeMenu': 'Close menu',
+
+    'hero.title': 'Keep the good<br /><em>stuff in reach.</em>',
+    'hero.lead': 'Nocket keeps the things you copy close by, so you can find a sentence, link, color, or file again without breaking your flow.',
+    'hero.cta': 'Download for macOS',
+    'hero.mockupAria': 'Nocket MacBook mockup',
+    'hero.mockupAlt': 'MacBook mockup showing Nocket',
+
+    'overlay.label': 'CLIPBOARD',
+    'overlay.title': 'Keep the good<br />stuff in reach.',
+    'overlay.search': 'Search your clipboard',
+    'overlay.itemOne': 'Launch notes',
+    'overlay.itemOneTime': 'now',
+    'overlay.itemTwo': 'Design handoff in Figma',
+    'overlay.itemTwoTime': '3m',
+
+    'intro.title': 'One small place<br />for the things you <em>reuse.</em>',
+    'intro.lead': 'Nocket turns your clipboard into a quiet visual layer above the work. Open it with a gesture, search by memory, and paste without losing your train of thought.',
+    'tag.history': '◒ Visual history',
+    'tag.shelf': '⌁ Notch shelf',
+    'tag.search': '⌘ Quick search',
+    'tag.drag': '↗ Drag anything',
+    'tag.shots': '◌ Screenshots',
+    'tag.collections': '✦ Collections',
+
+    'features.title': 'Make room for<br />the things you<br /><em>reach for.</em>',
+    'features.lead': 'The shelf expands above your current app instead of pulling you into another window. A color from Figma, a link from Safari or a snippet from Terminal: everything is ready when the thought comes back.',
+    'wide.search': '⌕ Search your memory',
+    'wide.all': 'All',
+    'wide.text': 'Text 12',
+    'wide.links': 'Links 18',
+    'wide.images': 'Images 8',
+    'wide.colors': 'Colors 5',
+    'wide.code': 'Code 21',
+    'clip.one': 'Hi, {name},<br />just following up on my...',
+    'clip.oneMeta': 'Chrome · 1 min ago',
+    'clip.two': 'Morning<br />reference',
+    'clip.twoMeta': 'Figma · 3 min ago',
+    'clip.threeMeta': 'Color · 6 min ago',
+    'clip.fourMeta': 'Color · 8 min ago',
+    'clip.five': '⌘<br />Quick note',
+    'clip.fiveMeta': 'Notes · 12 min ago',
+
+    'reverse.title': 'Copy. Return.<br />Pick up<br /><em>where you left off.</em>',
+    'reverse.lead': 'Text, links, screenshots, images, code, colors, and files become a visual trail of your work. Drag an item into the app in front of you, or paste it with one click.',
+    'notch.search': 'Search your memory',
+    'notch.all': 'All',
+    'notch.colors': 'Colors',
+    'notch.assets': 'Assets',
+    'notch.snippets': 'Snippets',
+    'notch.idea': 'Idea',
+    'notch.note': 'Note',
+    'notch.color': 'Color',
+
+    'quote.text': '“I stop asking myself where I put that link. Nocket gives the answer without making me leave the app I’m in.”',
+    'quote.role': 'Product designer',
+
+    'use.title': 'For the work<br />between <em>tabs.</em>',
+    'use.lead': 'Nocket is for the little pieces that keep a day moving: the reference you found, the reply you wrote, the color you liked, the command you’ll need again.',
+    'use.oneTitle': 'Visual work',
+    'use.oneBody': 'Keep colors, screenshots, SVGs, gradients, references, and assets close at hand.',
+    'use.twoTitle': 'Deep work',
+    'use.twoBody': 'Save code snippets, commands, errors, JSON, API responses, and links automatically.',
+    'use.threeTitle': 'Words in progress',
+    'use.threeBody': 'Capture hooks, taglines, drafts, research links, and all the phrases worth keeping.',
+    'use.fourTitle': 'Research mode',
+    'use.fourBody': 'Collect product ideas, competitor screenshots, notes, and daily references without clutter.',
+    'use.fiveTitle': 'Repeat work',
+    'use.fiveBody': 'Reuse your best replies, email templates, customer notes, and support screenshots.',
+    'use.sixTitle': 'Life outside work',
+    'use.sixBody': 'Find addresses, recipes, links, quotes, images, and anything you meant to save.',
+
+    'oss.eyebrow': 'Open source · MIT',
+    'oss.title': 'Free.<br /><em>And open source.</em>',
+    'oss.lead': 'No subscription, no license key, no catch. Nocket is MIT licensed. Read the code, change it, or just use it.',
+    'oss.cta': 'Download for macOS',
+    'oss.source': 'View source',
+    'oss.metaOne': 'macOS 14+',
+    'oss.metaTwo': 'Apple silicon and Intel',
+    'oss.metaThree': 'Nothing leaves your Mac',
+
+    'faq.title': 'Frequently asked<br /><em>questions.</em>',
+    'faq.lead': 'Everything you need to know about the Nocket notch shelf, privacy, compatibility, and clipboard storage.',
+    'faq.oneQ': 'How does the notch shelf work?',
+    'faq.oneA': 'Move your pointer to the MacBook notch or use the keyboard shortcut. Nocket expands above your current app, then closes when you’re done.',
+    'faq.twoQ': 'Does Nocket upload my copied content?',
+    'faq.twoA': 'No. Your clipboard history stays on your Mac. Nocket is local first and private by default.',
+    'faq.threeQ': 'What types of content does Nocket support?',
+    'faq.threeA': 'Text, links, screenshots, images, code, colors, and files, all organized in a visual history.',
+    'faq.fourQ': 'Can I use Nocket without a notch?',
+    'faq.fourA': 'Yes. The notch shelf is the signature experience, while a keyboard shortcut keeps Nocket fast on Macs with any display.',
+    'faq.fiveQ': 'Which Macs are supported?',
+    'faq.fiveA': 'Nocket is being built for modern Macs running macOS Sonoma 14 or later.',
+    'faq.sixQ': 'Is Nocket a subscription?',
+    'faq.sixA': 'No. Nocket is free and open source under the MIT license: no payment, no account, no catch.',
+
+    'dl.title': 'Your clipboard.<br /><em>One glance away.</em>',
+    'dl.lead': 'Turn the top of your Mac into the fastest place to find anything you copied.',
+    'dl.cta': 'Download',
+    'dl.actionsAria': 'Nocket links',
+    'dl.xAria': 'Nocket on X',
+    'dl.note': 'macOS Sonoma 14 or later · Latest build',
+
+    'footer.tagline': 'notch clipboard',
+    'footer.title': 'Your clipboard.<br /><em>Right in the notch.</em>',
+    'footer.lead': 'Nocket turns the top of your Mac into a private, visual shelf for everything you copy.',
+    'footer.cta': 'Download the app',
+    'footer.copy': '© 2026 Nocket. All rights reserved.',
+    'footer.menu': 'Menu',
+    'footer.home': 'Home',
+    'footer.notch': 'The notch',
+    'footer.features': 'Features',
+    'footer.faq': 'FAQ',
+    'footer.nav': 'Navigation',
+    'footer.useCases': 'Use cases',
+    'footer.download': 'Download',
+    'footer.contact': 'Contact',
+    'footer.more': 'More',
+    'footer.privacy': 'Privacy',
+    'footer.terms': 'Terms',
+    'footer.top': 'Back to top ↑',
+
+    'legal.back': '← Back to Nocket',
+    'privacy.metaTitle': 'Nocket: Privacy',
+    'privacy.eyebrow': 'Privacy',
+    'privacy.title': 'Your clipboard stays on your Mac.',
+    'privacy.body': 'Nocket is local first. Your clipboard history is stored on your device and is never uploaded to a Nocket server. This page stands in for the full privacy policy.',
+    'terms.metaTitle': 'Nocket: Terms',
+    'terms.eyebrow': 'Terms',
+    'terms.title': 'Simple software, clear terms.',
+    'terms.body': 'Nocket is provided as open source software under the MIT license. This page stands in for the full terms of service.'
+  },
+  ro: {
+    'meta.title': 'Nocket: Ține la îndemână ce contează.',
+    'meta.description': 'Nocket transformă notch-ul de pe MacBook într-un raft vizual și rapid pentru clipboard.',
+
+    'nav.idea': 'Ideea',
+    'nav.inside': 'În Nocket',
+    'nav.faq': 'Întrebări',
+    'nav.langAria': 'Schimbă limba',
+    'nav.download': 'Descarcă',
+    'nav.downloadMac': 'Descarcă pentru macOS',
+    'nav.menu': 'Meniu',
+    'nav.closeMenu': 'Închide meniul',
+
+    'hero.title': 'Ține la îndemână<br /><em>ce contează.</em>',
+    'hero.lead': 'Nocket păstrează aproape lucrurile pe care le copiezi, ca să regăsești o frază, un link, o culoare sau un fișier fără să îți pierzi ritmul.',
+    'hero.cta': 'Descarcă pentru macOS',
+    'hero.mockupAria': 'Machetă de MacBook cu Nocket',
+    'hero.mockupAlt': 'Machetă de MacBook care arată Nocket',
+
+    'overlay.label': 'CLIPBOARD',
+    'overlay.title': 'Ține la îndemână<br />ce contează.',
+    'overlay.search': 'Caută în clipboard',
+    'overlay.itemOne': 'Notițe de lansare',
+    'overlay.itemOneTime': 'acum',
+    'overlay.itemTwo': 'Predare de design în Figma',
+    'overlay.itemTwoTime': '3m',
+
+    'intro.title': 'Un loc mic<br />pentru lucrurile pe care le <em>refolosești.</em>',
+    'intro.lead': 'Nocket transformă clipboard-ul într-un strat vizual și discret peste munca ta. Îl deschizi dintr-un gest, cauți după memorie și lipești fără să pierzi firul gândului.',
+    'tag.history': '◒ Istoric vizual',
+    'tag.shelf': '⌁ Raft în notch',
+    'tag.search': '⌘ Căutare rapidă',
+    'tag.drag': '↗ Trage orice',
+    'tag.shots': '◌ Capturi de ecran',
+    'tag.collections': '✦ Colecții',
+
+    'features.title': 'Fă loc pentru<br />lucrurile la care<br /><em>revii.</em>',
+    'features.lead': 'Raftul se deschide peste aplicația curentă, în loc să te ducă într-o altă fereastră. O culoare din Figma, un link din Safari sau un fragment din Terminal: totul e pregătit când îți revine gândul.',
+    'wide.search': '⌕ Caută în memorie',
+    'wide.all': 'Toate',
+    'wide.text': 'Text 12',
+    'wide.links': 'Linkuri 18',
+    'wide.images': 'Imagini 8',
+    'wide.colors': 'Culori 5',
+    'wide.code': 'Cod 21',
+    'clip.one': 'Bună, {name},<br />revin cu privire la...',
+    'clip.oneMeta': 'Chrome · acum 1 min',
+    'clip.two': 'Referință<br />de dimineață',
+    'clip.twoMeta': 'Figma · acum 3 min',
+    'clip.threeMeta': 'Culoare · acum 6 min',
+    'clip.fourMeta': 'Culoare · acum 8 min',
+    'clip.five': '⌘<br />Notiță rapidă',
+    'clip.fiveMeta': 'Notițe · acum 12 min',
+
+    'reverse.title': 'Copiezi. Revii.<br />Continui<br /><em>de unde ai rămas.</em>',
+    'reverse.lead': 'Textele, linkurile, capturile, imaginile, codul, culorile și fișierele devin o urmă vizuală a muncii tale. Tragi un element în aplicația din față sau îl lipești dintr-un singur click.',
+    'notch.search': 'Caută în memorie',
+    'notch.all': 'Toate',
+    'notch.colors': 'Culori',
+    'notch.assets': 'Resurse',
+    'notch.snippets': 'Fragmente',
+    'notch.idea': 'Idee',
+    'notch.note': 'Notiță',
+    'notch.color': 'Culoare',
+
+    'quote.text': '„Nu mă mai întreb unde am pus linkul acela. Nocket îmi dă răspunsul fără să ies din aplicația în care lucrez.”',
+    'quote.role': 'Designer de produs',
+
+    'use.title': 'Pentru munca<br />dintre <em>tab-uri.</em>',
+    'use.lead': 'Nocket e pentru bucățile mici care țin ziua în mișcare: referința pe care ai găsit-o, răspunsul pe care l-ai scris, culoarea care ți-a plăcut, comanda de care vei mai avea nevoie.',
+    'use.oneTitle': 'Lucru vizual',
+    'use.oneBody': 'Ține la îndemână culori, capturi, fișiere SVG, gradiente, referințe și alte resurse.',
+    'use.twoTitle': 'Muncă de concentrare',
+    'use.twoBody': 'Salvează automat fragmente de cod, comenzi, erori, JSON, răspunsuri de API și linkuri.',
+    'use.threeTitle': 'Cuvinte în lucru',
+    'use.threeBody': 'Prinde titluri, sloganuri, ciorne, linkuri de documentare și toate frazele care merită păstrate.',
+    'use.fourTitle': 'Mod cercetare',
+    'use.fourBody': 'Adună idei de produs, capturi de la concurență, notițe și referințe zilnice, fără dezordine.',
+    'use.fiveTitle': 'Lucru repetitiv',
+    'use.fiveBody': 'Refolosește cele mai bune răspunsuri, șabloane de email, notițe despre clienți și capturi pentru suport.',
+    'use.sixTitle': 'Viața de după program',
+    'use.sixBody': 'Găsește adrese, rețete, linkuri, citate, imagini și orice ai vrut să păstrezi.',
+
+    'oss.eyebrow': 'Sursă deschisă · MIT',
+    'oss.title': 'Gratuit.<br /><em>Și open source.</em>',
+    'oss.lead': 'Fără abonament, fără cheie de licență, fără capcane. Nocket are licență MIT. Citește codul, modifică-l sau doar folosește aplicația.',
+    'oss.cta': 'Descarcă pentru macOS',
+    'oss.source': 'Vezi codul',
+    'oss.metaOne': 'macOS 14+',
+    'oss.metaTwo': 'Apple silicon și Intel',
+    'oss.metaThree': 'Nimic nu pleacă de pe Mac-ul tău',
+
+    'faq.title': 'Întrebări<br /><em>frecvente.</em>',
+    'faq.lead': 'Tot ce trebuie să știi despre raftul din notch, confidențialitate, compatibilitate și istoricul clipboard-ului.',
+    'faq.oneQ': 'Cum funcționează raftul din notch?',
+    'faq.oneA': 'Duci cursorul la notch-ul MacBook-ului sau folosești scurtătura de tastatură. Nocket se deschide peste aplicația curentă, apoi se închide când ai terminat.',
+    'faq.twoQ': 'Nocket trimite undeva ce copiez?',
+    'faq.twoA': 'Nu. Istoricul clipboard-ului rămâne pe Mac-ul tău. Nocket lucrează local și este privat în mod implicit.',
+    'faq.threeQ': 'Ce tipuri de conținut acceptă Nocket?',
+    'faq.threeA': 'Text, linkuri, capturi de ecran, imagini, cod, culori și fișiere, toate organizate într-un istoric vizual.',
+    'faq.fourQ': 'Pot folosi Nocket fără notch?',
+    'faq.fourA': 'Da. Raftul din notch este experiența care definește aplicația, iar scurtătura de tastatură ține Nocket la fel de rapid pe Mac-uri cu orice ecran.',
+    'faq.fiveQ': 'Ce Mac-uri sunt compatibile?',
+    'faq.fiveA': 'Nocket este construit pentru Mac-uri moderne, cu macOS Sonoma 14 sau mai nou.',
+    'faq.sixQ': 'Nocket se plătește prin abonament?',
+    'faq.sixA': 'Nu. Nocket este gratuit și open source, sub licență MIT: fără plată, fără cont, fără capcane.',
+
+    'dl.title': 'Clipboard-ul tău.<br /><em>La o privire distanță.</em>',
+    'dl.lead': 'Transformă partea de sus a Mac-ului în cel mai rapid loc în care găsești orice ai copiat.',
+    'dl.cta': 'Descarcă',
+    'dl.actionsAria': 'Linkuri Nocket',
+    'dl.xAria': 'Nocket pe X',
+    'dl.note': 'macOS Sonoma 14 sau mai nou · Ultima versiune',
+
+    'footer.tagline': 'clipboard în notch',
+    'footer.title': 'Clipboard-ul tău.<br /><em>Chiar în notch.</em>',
+    'footer.lead': 'Nocket transformă partea de sus a Mac-ului într-un raft vizual și privat pentru tot ce copiezi.',
+    'footer.cta': 'Descarcă aplicația',
+    'footer.copy': '© 2026 Nocket. Toate drepturile rezervate.',
+    'footer.menu': 'Meniu',
+    'footer.home': 'Acasă',
+    'footer.notch': 'Notch-ul',
+    'footer.features': 'Funcții',
+    'footer.faq': 'Întrebări',
+    'footer.nav': 'Navigare',
+    'footer.useCases': 'Cazuri de folosire',
+    'footer.download': 'Descarcă',
+    'footer.contact': 'Contact',
+    'footer.more': 'Altele',
+    'footer.privacy': 'Confidențialitate',
+    'footer.terms': 'Termeni',
+    'footer.top': 'Înapoi sus ↑',
+
+    'legal.back': '← Înapoi la Nocket',
+    'privacy.metaTitle': 'Nocket: Confidențialitate',
+    'privacy.eyebrow': 'Confidențialitate',
+    'privacy.title': 'Clipboard-ul tău rămâne pe Mac-ul tău.',
+    'privacy.body': 'Nocket lucrează local. Istoricul clipboard-ului este păstrat pe dispozitivul tău și nu este încărcat pe un server Nocket. Această pagină ține locul politicii de confidențialitate complete.',
+    'terms.metaTitle': 'Nocket: Termeni',
+    'terms.eyebrow': 'Termeni',
+    'terms.title': 'Software simplu, termeni clari.',
+    'terms.body': 'Nocket este oferit ca software open source, sub licența MIT. Această pagină ține locul termenilor de utilizare compleți.'
+  }
+};
+
+const defaultLanguage = 'en';
+let currentLanguage = defaultLanguage;
+const t = (key) => translations[currentLanguage]?.[key] ?? translations[defaultLanguage][key] ?? '';
+
 const menuToggle = document.querySelector('.menu-toggle');
 const mainNav = document.querySelector('.mobile-nav');
 const notchNav = document.querySelector('[data-notch-nav]');
@@ -52,12 +348,24 @@ notchNav?.addEventListener('focusout', () => {
   }, 0);
 });
 
+const drawerClose = mainNav?.querySelector('.drawer-close');
+
 const setMobileMenu = (open) => {
   mainNav?.classList.toggle('is-open', open);
+  menuToggle?.classList.toggle('is-open', open);
   document.body.classList.toggle('mobile-menu-open', open);
   menuToggle?.setAttribute('aria-expanded', String(open));
-  if (menuToggle) menuToggle.textContent = open ? 'Close' : 'Menu';
+  menuToggle?.setAttribute('aria-label', open ? t('nav.closeMenu') : t('nav.menu'));
+  // focusul intra in panou la deschidere si se intoarce pe buton la inchidere
+  if (open) drawerClose?.focus();
+  else if (mainNav?.contains(document.activeElement)) menuToggle?.focus();
 };
+
+drawerClose?.addEventListener('click', () => setMobileMenu(false));
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && mainNav?.classList.contains('is-open')) setMobileMenu(false);
+});
 
 menuToggle?.addEventListener('click', () => {
   setNotchShelf(false, false);
@@ -115,8 +423,6 @@ const revealTargets = document.querySelectorAll([
   '.pricing-inner > h2',
   '.pricing-inner > p',
   '.price-card',
-  '.social-heading > *',
-  '.social-card',
   '.faq > h2',
   '.faq > p',
   '.faq-grid details',
@@ -159,241 +465,186 @@ document.addEventListener('keydown', (event) => {
 
 document.querySelectorAll('.download-arrow').forEach((arrow) => arrow.remove());
 
-document.querySelectorAll('.download-link').forEach((link) => {
-  [...link.childNodes].forEach((node) => {
-    if (node.nodeType !== Node.TEXT_NODE) return;
+// Keep the FAQ focused and animate both opening and closing.
+const faqItems = document.querySelectorAll('.faq-grid details');
+const faqAnimationDuration = 340;
+const faqCloseTimers = new WeakMap();
 
-    if (node.textContent.includes('Descarcă pentru macOS')) {
-      node.textContent = 'Download for macOS';
-    } else if (node.textContent.includes('Descarcă aplicația')) {
-      node.textContent = 'Download the app';
-    } else if (node.textContent.includes('Descarcă')) {
-      node.textContent = 'Download';
+const closeFaqItem = (item) => {
+  window.clearTimeout(faqCloseTimers.get(item));
+  item.classList.remove('is-expanded');
+  item.classList.add('is-collapsing');
+  const timer = window.setTimeout(() => {
+    item.open = false;
+    window.setTimeout(() => item.classList.remove('is-collapsing'), 0);
+  }, faqAnimationDuration);
+  faqCloseTimers.set(item, timer);
+};
+
+faqItems.forEach((item) => {
+  if (item.open) window.requestAnimationFrame(() => item.classList.add('is-expanded'));
+  item.addEventListener('toggle', () => {
+    if (item.classList.contains('is-collapsing')) return;
+    if (item.open) {
+      faqItems.forEach((otherItem) => {
+        if (otherItem !== item && otherItem.open && !otherItem.classList.contains('is-collapsing')) closeFaqItem(otherItem);
+      });
+      window.requestAnimationFrame(() => item.classList.add('is-expanded'));
+      return;
     }
+
+    item.open = true;
+    closeFaqItem(item);
   });
 });
 
-const navBar = document.querySelector('.nav-bar');
-const languageControl = document.createElement('div');
-languageControl.className = 'language-control';
-languageControl.innerHTML = '<button class="language-button" type="button" aria-expanded="false" aria-haspopup="true"><span>EN</span><i>⌄</i></button><div class="language-menu" role="menu"><button type="button" data-locale="en" role="menuitem">English <span>EN</span></button><button type="button" data-locale="ro" role="menuitem">Română <span>RO</span></button></div>';
-navBar?.insertBefore(languageControl, menuToggle);
-const languageButton = languageControl.querySelector('.language-button');
-const languageMenu = languageControl.querySelector('.language-menu');
+// Keep the product language switch close to the visual system, so the same
+// page can be read in English or Romanian without a second layout.
+(() => {
+  const toggle = document.querySelector('[data-lang-toggle]');
+  if (!toggle) return;
 
-const translations = {
-  en: {
-    label: 'Language',
-    nav: ['The Notch', 'Features', 'FAQ', 'Follow'],
-    mobileDownload: 'Download for macOS',
-    eyebrow: 'Lives in your MacBook notch',
-    heroTitle: 'Your clipboard.<br /><em>Right in the notch.</em>',
-    heroCopy: 'iPaste turns the space around your notch into a visual clipboard shelf. Move to the top of your screen, find anything you copied, and paste it back without leaving your work.',
-    meta: ['Always one glance away', 'Fully offline and private', 'macOS Sonoma 14+'],
-    introTitle: 'The notch,<br />now actually <em>useful.</em>',
-    introCopy: 'Move your pointer to the notch and iPaste expands into a focused clipboard shelf above whatever you’re doing. Search, drag, or paste — then it quietly disappears.',
-    tags: ['◒ Notch shelf', '⌁ Hover to open', '⌘ Quick search', '↗ Drag anything', '◌ Screenshots', '✦ Collections'],
-    panels: [
-      ['Your history<br />opens above<br /><em>your current app.</em>', 'The notch shelf expands without switching windows. Find a color from Figma, a link from Safari, a snippet from Terminal, or that screenshot from last week.'],
-      ['Open. Find.<br />Drag it out.<br /><em>Keep moving.</em>', 'Text, links, screenshots, images, code, colors, and files stay inside the notch shelf. Drag an item straight into your current app or paste it with one click.']
-    ],
-    audiencesTitle: 'Built for <em>everything</em><br />you copy.',
-    audiencesCopy: 'From design assets and code snippets to customer replies and personal notes, iPaste keeps every useful piece ready to reuse.',
-    audienceCards: [
-      ['Designers', 'Keep colors, icons, screenshots, SVGs, gradients, references, and assets close at hand.'],
-      ['Developers', 'Save code snippets, commands, errors, JSON, API responses, and links automatically.'],
-      ['Writers', 'Capture hooks, taglines, drafts, research links, and all the phrases worth keeping.'],
-      ['Founders', 'Organize product ideas, investor notes, competitor screenshots, and daily research.'],
-      ['Support teams', 'Reuse your best replies, email templates, customer notes, and support screenshots.'],
-      ['Personal use', 'Find addresses, recipes, links, quotes, images, and anything you meant to save.']
-    ],
-    pricingEyebrow: 'Simple by design',
-    pricingTitle: 'Free to use.<br /><em>Open to everyone.</em>',
-    pricingCopy: 'No subscription. No account. No catch. iPaste is free forever and open source under the MIT license.',
-    priceProductSubtitle: 'Built for macOS Sonoma 14 or later',
-    priceBadge: 'MIT licensed',
-    priceSubtitle: 'Everything you need to keep moving.',
-    priceFeaturesLabel: 'Included with iPaste',
-    pricePills: ['Free forever', 'Private by default', 'Open source'],
-    price: '0',
-    source: 'View source on GitHub ↗',
-    priceItems: ['Private by default — nothing leaves your Mac', 'Native macOS app, built with SwiftUI', 'Open source — fork it, audit it, ship it', 'Free forever, with no hidden limits'],
-    priceFooterNote: 'Made for the notch',
-    priceTrust: ['Free forever', 'Private by default', 'Open source'],
-    socialEyebrow: 'Stay close to the project',
-    socialTitle: 'Follow the build.<br /><em>Share the signal.</em>',
-    socialCopy: 'See what’s new, follow the decisions behind iPaste, and help shape the next release.',
-    socialXTitle: 'Follow @adriannviziteu',
-    socialXCopy: 'Product notes, updates, and the ideas behind iPaste.',
-    socialGitHubTitle: 'Explore iPaste on GitHub',
-    socialGitHubCopy: 'Read the code, track releases, or contribute to the project.',
-    faqTitle: 'Frequently asked<br /><em>questions.</em>',
-    faqCopy: 'Everything you need to know about the iPaste notch shelf, privacy, compatibility, and clipboard storage.',
-    faq: [
-      ['How does the notch shelf work?', 'Move your pointer to the MacBook notch or use the keyboard shortcut. iPaste expands above your current app, then closes when you’re done.'],
-      ['Does iPaste upload my copied content?', 'No. Your clipboard history stays on your Mac. iPaste is local-first and private by default.'],
-      ['What types of content does iPaste support?', 'Text, links, screenshots, images, code, colors, and files — all organized in a visual history.'],
-      ['Can I use iPaste without a notch?', 'Yes. The notch shelf is the signature experience, while a keyboard shortcut keeps iPaste fast on Macs with any display.'],
-      ['Which Macs are supported?', 'iPaste is being built for modern Macs running macOS Sonoma 14 or later.'],
-      ['Is iPaste a subscription?', 'No. iPaste is free and open source under the MIT license — no payment, no account, no catch.']
-    ],
-    downloadLabel: 'iPaste / Built for the notch',
-    downloadTitle: 'Your clipboard.<br /><em>One glance away.</em>',
-    downloadCopy: 'Turn the top of your Mac into the fastest place to find anything you copied.',
-    latest: 'macOS Sonoma 14 or later · Latest build',
-    footerTitle: 'Your clipboard.<br /><em>Right in the notch.</em>',
-    footerCopy: 'iPaste turns the top of your Mac into a private, visual shelf for everything you copy.',
-    footerColumns: [['Menu', 'Home', 'The Notch', 'Features', 'FAQ'], ['Navigation', 'Use cases', 'Download', 'Contact'], ['Legal', 'Privacy Policy', 'Terms of Service', 'Support']]
-  },
-  ro: {
-    label: 'Limbă',
-    nav: ['Notch-ul', 'Funcții', 'Întrebări frecvente', 'Urmărește'],
-    mobileDownload: 'Descarcă pentru macOS',
-    eyebrow: 'Trăiește în notch-ul MacBook-ului',
-    heroTitle: 'Clipboard-ul tău.<br /><em>Chiar în notch.</em>',
-    heroCopy: 'iPaste transformă spațiul din jurul notch-ului într-un raft vizual pentru clipboard. Mută cursorul în partea de sus a ecranului, găsește orice ai copiat și lipește-l fără să-ți întrerupi munca.',
-    meta: ['Mereu la o privire distanță', 'Complet offline și privat', 'macOS Sonoma 14+'],
-    introTitle: 'Notch-ul,<br />acum cu adevărat <em>util.</em>',
-    introCopy: 'Mută cursorul spre notch, iar iPaste se extinde într-un raft concentrat pentru clipboard, deasupra aplicației curente. Caută, trage sau lipește — apoi dispare discret.',
-    tags: ['◒ Raft notch', '⌁ Treci pentru a deschide', '⌘ Căutare rapidă', '↗ Trage orice', '◌ Capturi de ecran', '✦ Colecții'],
-    panels: [
-      ['Istoricul tău<br />se deschide deasupra<br /><em>aplicației curente.</em>', 'Raftul notch se extinde fără să schimbi ferestrele. Găsește o culoare din Figma, un link din Safari, un fragment din Terminal sau captura de săptămâna trecută.'],
-      ['Deschide. Găsește.<br />Trage afară.<br /><em>Continuă.</em>', 'Textele, linkurile, capturile, imaginile, codul, culorile și fișierele rămân în raftul notch. Trage un element direct în aplicația curentă sau lipește-l cu un singur click.']
-    ],
-    audiencesTitle: 'Creat pentru <em>tot ce</em><br />copiezi.',
-    audiencesCopy: 'De la materiale de design și fragmente de cod la răspunsuri pentru clienți și notițe personale, iPaste păstrează tot ce îți este util gata de refolosit.',
-    audienceCards: [
-      ['Designeri', 'Păstrează culori, pictograme, capturi, SVG-uri, degradeuri, referințe și materiale la îndemână.'],
-      ['Dezvoltatori', 'Salvează automat fragmente de cod, comenzi, erori, JSON, răspunsuri API și linkuri.'],
-      ['Scriitori', 'Adună idei de început, sloganuri, schițe, linkuri de cercetare și toate formulările importante.'],
-      ['Fondatori', 'Organizează idei de produs, notițe pentru investitori, capturi de la competitori și cercetarea zilnică.'],
-      ['Echipe de suport', 'Refolosește răspunsurile, șabloanele de email, notițele clienților și capturile de suport.'],
-      ['Uz personal', 'Găsește adrese, rețete, linkuri, citate, imagini și orice ai vrut să păstrezi.']
-    ],
-    pricingEyebrow: 'Simplu, din start',
-    pricingTitle: 'Gratuit de folosit.<br /><em>Deschis tuturor.</em>',
-    pricingCopy: 'Fără abonament. Fără cont. Fără surprize. iPaste este gratuit pentru totdeauna și open source sub licența MIT.',
-    priceProductSubtitle: 'Creat pentru macOS Sonoma 14 sau mai nou',
-    priceBadge: 'Licență MIT',
-    priceSubtitle: 'Tot ce ai nevoie ca să mergi mai departe.',
-    priceFeaturesLabel: 'Inclus în iPaste',
-    pricePills: ['Gratuit pentru totdeauna', 'Privat implicit', 'Open source'],
-    price: '0',
-    source: 'Vezi codul pe GitHub ↗',
-    priceItems: ['Privat implicit — nimic nu părăsește Mac-ul tău', 'Aplicație macOS nativă, construită cu SwiftUI', 'Open source — copiază, verifică și publică', 'Gratuit pentru totdeauna, fără limite ascunse'],
-    priceFooterNote: 'Creat pentru notch',
-    priceTrust: ['Gratuit pentru totdeauna', 'Privat implicit', 'Open source'],
-    socialEyebrow: 'Rămâi aproape de proiect',
-    socialTitle: 'Urmărește evoluția.<br /><em>Fă parte din poveste.</em>',
-    socialCopy: 'Vezi noutățile, urmărește deciziile din spatele iPaste și ajută la conturarea următoarei versiuni.',
-    socialXTitle: 'Urmărește @adriannviziteu',
-    socialXCopy: 'Note de produs, noutăți și ideile din spatele iPaste.',
-    socialGitHubTitle: 'Descoperă iPaste pe GitHub',
-    socialGitHubCopy: 'Citește codul, urmărește versiunile sau contribuie la proiect.',
-    faqTitle: 'Întrebări<br /><em>frecvente.</em>',
-    faqCopy: 'Tot ce trebuie să știi despre raftul notch, confidențialitate, compatibilitate și stocarea clipboard-ului.',
-    faq: [
-      ['Cum funcționează raftul notch?', 'Mută cursorul spre notch-ul MacBook-ului sau folosește scurtătura de tastatură. iPaste se extinde deasupra aplicației curente și se închide când ai terminat.'],
-      ['iPaste încarcă ce copiez?', 'Nu. Istoricul clipboard-ului rămâne pe Mac-ul tău. iPaste este local și privat implicit.'],
-      ['Ce tipuri de conținut acceptă iPaste?', 'Texte, linkuri, capturi, imagini, cod, culori și fișiere — toate organizate într-un istoric vizual.'],
-      ['Pot folosi iPaste fără notch?', 'Da. Raftul notch este experiența principală, iar o scurtătură de tastatură păstrează iPaste rapid pe orice Mac.'],
-      ['Ce Mac-uri sunt compatibile?', 'iPaste este construit pentru Mac-uri moderne care rulează macOS Sonoma 14 sau o versiune ulterioară.'],
-      ['iPaste este pe bază de abonament?', 'Nu. iPaste este gratuit și open source sub licența MIT — fără plată, cont sau surprize.']
-    ],
-    downloadLabel: 'iPaste / Creat pentru notch',
-    downloadTitle: 'Clipboard-ul tău.<br /><em>La o privire distanță.</em>',
-    downloadCopy: 'Transformă partea de sus a Mac-ului în cel mai rapid loc pentru a găsi orice ai copiat.',
-    latest: 'macOS Sonoma 14 sau mai nou · Ultima versiune',
-    footerTitle: 'Clipboard-ul tău.<br /><em>Chiar în notch.</em>',
-    footerCopy: 'iPaste transformă partea de sus a Mac-ului într-un raft vizual și privat pentru tot ce copiezi.',
-    footerColumns: [['Meniu', 'Acasă', 'Notch-ul', 'Funcții', 'Întrebări frecvente'], ['Navigare', 'Cazuri de utilizare', 'Descarcă', 'Contact'], ['Legal', 'Politica de confidențialitate', 'Termeni și condiții', 'Suport']]
-  }
-};
+  // Round flag marks, drawn inline so the switch never falls back to emoji.
+  // Add a language by appending an entry here plus its `strings` block above.
+  const flags = {
+    en: '<svg viewBox="0 0 60 60" aria-hidden="true" focusable="false"><clipPath id="fc-en"><circle cx="30" cy="30" r="30"/></clipPath><g clip-path="url(#fc-en)"><rect width="60" height="60" fill="#fff"/><g fill="#B22234"><rect width="60" height="4.62"/><rect y="9.23" width="60" height="4.62"/><rect y="18.46" width="60" height="4.62"/><rect y="27.69" width="60" height="4.62"/><rect y="36.92" width="60" height="4.62"/><rect y="46.15" width="60" height="4.62"/><rect y="55.38" width="60" height="4.62"/></g><rect width="27" height="32.3" fill="#3C3B6E"/><g fill="#fff"><circle cx="5" cy="5" r="1.9"/><circle cx="14" cy="5" r="1.9"/><circle cx="23" cy="5" r="1.9"/><circle cx="9.5" cy="12" r="1.9"/><circle cx="18.5" cy="12" r="1.9"/><circle cx="5" cy="19" r="1.9"/><circle cx="14" cy="19" r="1.9"/><circle cx="23" cy="19" r="1.9"/><circle cx="9.5" cy="26" r="1.9"/><circle cx="18.5" cy="26" r="1.9"/></g></g></svg>',
+    ro: '<svg viewBox="0 0 60 60" aria-hidden="true" focusable="false"><clipPath id="fc-ro"><circle cx="30" cy="30" r="30"/></clipPath><g clip-path="url(#fc-ro)"><rect width="20" height="60" fill="#002B7F"/><rect x="20" width="20" height="60" fill="#FCD116"/><rect x="40" width="20" height="60" fill="#CE1126"/></g></svg>'
+  };
 
-const setHTML = (selector, value) => {
-  const element = document.querySelector(selector);
-  if (element) element.innerHTML = value;
-};
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'ro', name: 'Română' }
+  ];
 
-const setText = (selector, value) => {
-  const element = document.querySelector(selector);
-  if (element) element.textContent = value;
-};
+  const menu = document.createElement('div');
+  menu.className = 'lang-menu';
+  menu.setAttribute('role', 'listbox');
+  document.body.appendChild(menu);
 
-const setDirectText = (element, value) => {
-  if (!element) return;
-  const textNode = [...element.childNodes].find((node) => node.nodeType === Node.TEXT_NODE);
-  if (textNode) textNode.textContent = value;
-  else element.prepend(document.createTextNode(value));
-};
+  menu.innerHTML = languages.map((language) => `
+    <button class="lang-option" type="button" role="option" data-lang-code="${language.code}">
+      <span class="lang-flag">${flags[language.code] || ''}</span>
+      <span class="lang-name">${language.name}</span>
+      <span class="lang-check">✓</span>
+    </button>`).join('');
 
-const setLanguage = (locale) => {
-  const content = translations[locale] || translations.en;
-  document.documentElement.lang = locale;
-  localStorage.setItem('ipaste-language', locale);
-  if (languageButton) languageButton.querySelector('span').textContent = locale.toUpperCase();
-  languageControl.querySelectorAll('[data-locale]').forEach((option) => option.classList.toggle('is-active', option.dataset.locale === locale));
-  document.querySelectorAll('.nav-links a').forEach((link, index) => setText(`.nav-links a:nth-child(${index + 1})`, content.nav[index]));
-  document.querySelectorAll('.mobile-nav > a:not(.download-link)').forEach((link, index) => setDirectText(link, content.nav[index]));
-  document.querySelectorAll('.download-link').forEach((link) => setDirectText(link, link.closest('.mobile-nav') ? content.mobileDownload : (locale === 'ro' ? 'Descarcă pentru macOS' : 'Download for macOS')));
-  setDirectText(document.querySelector('.hero-eyebrow'), content.eyebrow);
-  setHTML('.hero h1', content.heroTitle);
-  setText('.hero-content > p', content.heroCopy);
-  document.querySelectorAll('.hero-meta span').forEach((element, index) => setText(`.hero-meta span:nth-child(${index + 1})`, content.meta[index]));
-  setHTML('.intro h2', content.introTitle);
-  setText('.intro > p', content.introCopy);
-  document.querySelectorAll('.feature-tags span').forEach((element, index) => setText(`.feature-tags span:nth-child(${index + 1})`, content.tags[index]));
-  document.querySelectorAll('.feature-panel .panel-copy').forEach((panel, index) => { panel.querySelector('h2').innerHTML = content.panels[index][0]; panel.querySelector('p').textContent = content.panels[index][1]; });
-  setHTML('.audiences h2', content.audiencesTitle);
-  setText('.audiences > p', content.audiencesCopy);
-  document.querySelectorAll('.audience-grid article').forEach((article, index) => { setText(`.audience-grid article:nth-child(${index + 1}) h3`, content.audienceCards[index][0]); setText(`.audience-grid article:nth-child(${index + 1}) p`, content.audienceCards[index][1]); });
-  setText('.pricing-eyebrow', content.pricingEyebrow);
-  setHTML('.pricing-intro h2', content.pricingTitle);
-  setText('.pricing-intro > p:last-child', content.pricingCopy);
-  setText('.price-product > div > span', content.priceProductSubtitle);
-  setText('.price-badge', content.priceBadge);
-  setText('.price-subtitle', content.priceSubtitle);
-  setText('.price-features-label', content.priceFeaturesLabel);
-  document.querySelectorAll('.price-trust > span').forEach((element, index) => setText(`.price-trust > span:nth-of-type(${index + 1})`, content.pricePills[index]));
-  setText('.price-amount strong', content.price);
-  setText('.price-card-footer a', content.source);
-  setText('.price-card-footer > span', content.priceFooterNote);
-  document.querySelectorAll('.price-features li > span:last-child').forEach((element, index) => setText(`.price-features li:nth-child(${index + 1}) > span:last-child`, content.priceItems[index]));
-  setText('.social-eyebrow', content.socialEyebrow);
-  setHTML('.social-section h2', content.socialTitle);
-  setText('.social-copy', content.socialCopy);
-  setText('.social-card-x strong', content.socialXTitle);
-  setText('.social-card-x .social-card-copy', content.socialXCopy);
-  setText('.social-card-github strong', content.socialGitHubTitle);
-  setText('.social-card-github .social-card-copy', content.socialGitHubCopy);
-  setHTML('.faq h2', content.faqTitle);
-  setText('.faq > p', content.faqCopy);
-  document.querySelectorAll('.faq-grid details').forEach((detail, index) => { setDirectText(detail.querySelector('summary'), content.faq[index][0]); setText(`.faq-grid details:nth-child(${index + 1}) p`, content.faq[index][1]); });
-  setText('.download-label', content.downloadLabel);
-  setHTML('.download-inner h2', content.downloadTitle);
-  setText('.download-inner p', content.downloadCopy);
-  setText('.download-inner > small', content.latest);
-  setHTML('.footer-product h2', content.footerTitle);
-  setText('.footer-product > p', content.footerCopy);
-  setDirectText(document.querySelector('.footer-button'), locale === 'ro' ? 'Descarcă aplicația' : 'Download the app');
-  document.querySelectorAll('.footer-column').forEach((column, columnIndex) => { const values = content.footerColumns[columnIndex]; column.querySelector('strong').textContent = values[0]; column.querySelectorAll('a').forEach((link, linkIndex) => { link.textContent = values[linkIndex + 1]; }); });
-};
+  const closeMenu = () => {
+    menu.classList.remove('is-open');
+    toggle.setAttribute('aria-expanded', 'false');
+  };
 
-const initialLanguage = localStorage.getItem('ipaste-language') || 'en';
-setLanguage(initialLanguage);
-languageButton?.addEventListener('click', () => {
-  const isOpen = languageControl.classList.toggle('is-open');
-  languageButton.setAttribute('aria-expanded', String(isOpen));
-});
-languageMenu?.addEventListener('click', (event) => {
-  const option = event.target.closest('[data-locale]');
-  if (!option) return;
-  setLanguage(option.dataset.locale);
-  languageControl.classList.remove('is-open');
-  languageButton.setAttribute('aria-expanded', 'false');
-});
-document.addEventListener('click', (event) => {
-  if (languageControl.contains(event.target)) return;
-  languageControl.classList.remove('is-open');
-  languageButton?.setAttribute('aria-expanded', 'false');
-});
+  // The notch clips its own overflow, so the menu lives on <body> and is
+  // parked under the toggle each time it opens.
+  const openMenu = () => {
+    const box = toggle.getBoundingClientRect();
+    menu.style.top = `${box.bottom + 10}px`;
+    menu.style.right = `${Math.max(12, window.innerWidth - box.right - 40)}px`;
+    menu.classList.add('is-open');
+    toggle.setAttribute('aria-expanded', 'true');
+  };
+
+  const applyLanguage = (language) => {
+    currentLanguage = translations[language] ? language : defaultLanguage;
+
+    document.querySelectorAll('[data-i18n]').forEach((element) => {
+      const value = t(element.dataset.i18n);
+      if (value) element.innerHTML = value;
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach((element) => {
+      const value = t(element.dataset.i18nAria);
+      if (value) element.setAttribute('aria-label', value);
+    });
+    document.querySelectorAll('[data-i18n-alt]').forEach((element) => {
+      const value = t(element.dataset.i18nAlt);
+      if (value) element.setAttribute('alt', value);
+    });
+
+    const pageTitle = t(document.documentElement.dataset.titleKey || 'meta.title');
+    if (pageTitle) document.title = pageTitle;
+    const description = document.querySelector('meta[name="description"]');
+    if (description && t('meta.description')) description.setAttribute('content', t('meta.description'));
+
+    document.documentElement.lang = currentLanguage;
+    toggle.innerHTML = `<span class="lang-flag">${flags[currentLanguage] || ''}</span>`;
+    menu.querySelectorAll('.lang-option').forEach((option) => {
+      const isActive = option.dataset.langCode === currentLanguage;
+      option.classList.toggle('is-active', isActive);
+      option.setAttribute('aria-selected', String(isActive));
+    });
+    localStorage.setItem('ipaste-language', currentLanguage);
+  };
+
+  const saved = localStorage.getItem('ipaste-language');
+  applyLanguage(languages.some((language) => language.code === saved) ? saved : 'en');
+
+  toggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (menu.classList.contains('is-open')) closeMenu(); else openMenu();
+  });
+
+  menu.addEventListener('click', (event) => {
+    const option = event.target.closest('.lang-option');
+    if (!option) return;
+    applyLanguage(option.dataset.langCode);
+    closeMenu();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!menu.contains(event.target)) closeMenu();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu();
+  });
+  window.addEventListener('scroll', closeMenu, { passive: true });
+})();
+
+// Scroll-driven motion for the dependency-free MacBook hero preview.
+(() => {
+  const stage = document.querySelector('[data-macbook-scroll]');
+  const lid = document.querySelector('[data-macbook-lid]');
+  const base = document.querySelector('[data-macbook-base]');
+  if (!stage || !lid || !base || reducedMotion) return;
+
+  let frame = false;
+  const updateMacbook = () => {
+    frame = false;
+    const rect = stage.getBoundingClientRect();
+    const travel = Math.max(window.innerHeight * 0.65, 420);
+    const progress = Math.min(1, Math.max(0, (window.innerHeight - rect.top) / travel));
+    const lidAngle = -19 + progress * 19;
+    const lidLift = progress * 46;
+    const baseAngle = 10 - progress * 10;
+    lid.style.transform = `rotateX(${lidAngle.toFixed(2)}deg) translateY(${lidLift.toFixed(1)}px)`;
+    base.style.transform = `perspective(1250px) rotateX(${baseAngle.toFixed(2)}deg)`;
+  };
+
+  const requestMacbookUpdate = () => {
+    if (frame) return;
+    frame = true;
+    window.requestAnimationFrame(updateMacbook);
+  };
+
+  updateMacbook();
+  window.addEventListener('scroll', requestMacbookUpdate, { passive: true });
+  window.addEventListener('resize', requestMacbookUpdate);
+})();
+
+(() => {
+  const imageMockup = document.querySelector('[data-macbook-image]');
+  if (!imageMockup || reducedMotion) return;
+  let frame = false;
+  const updateImageMockup = () => {
+    frame = false;
+    const rect = imageMockup.getBoundingClientRect();
+    const progress = Math.min(1, Math.max(0, (window.innerHeight - rect.top) / Math.max(window.innerHeight * 0.8, 500)));
+    imageMockup.style.transform = `translateY(${(progress * 28).toFixed(1)}px) scale(${(1 - progress * 0.018).toFixed(3)})`;
+  };
+  const requestImageUpdate = () => {
+    if (frame) return;
+    frame = true;
+    window.requestAnimationFrame(updateImageMockup);
+  };
+  updateImageMockup();
+  window.addEventListener('scroll', requestImageUpdate, { passive: true });
+  window.addEventListener('resize', requestImageUpdate);
+})();

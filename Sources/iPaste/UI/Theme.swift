@@ -57,9 +57,45 @@ extension Color {
 }
 
 extension View {
+    /// The app's one primary-action look: real glass on macOS 26+, the
+    /// system's bordered-prominent button everywhere else.
+    @ViewBuilder
+    func primaryActionStyle() -> some View {
+        if #available(macOS 26.0, *) {
+            buttonStyle(.glassProminent)
+        } else {
+            buttonStyle(.borderedProminent)
+        }
+    }
+
     /// Rounded corners plus panel backing, shared by every floating window.
+    ///
+    /// On macOS 26+ this is real Liquid Glass; older systems keep the
+    /// `.ultraThinMaterial` look this app shipped with before.
+    @ViewBuilder
     func panelChrome() -> some View {
-        background(Theme.PanelBackground())
-            .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+        if #available(macOS 26.0, *) {
+            self
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [.white.opacity(0.35), .white.opacity(0.05)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 1
+                        )
+                }
+                // glassEffect only shapes the backing, not the content in front of
+                // it — without this, the result list squares off past the corners
+                // instead of being cut by them.
+                .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+        } else {
+            self
+                .background(Theme.PanelBackground())
+                .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+        }
     }
 }

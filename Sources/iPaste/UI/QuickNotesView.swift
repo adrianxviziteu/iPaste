@@ -28,7 +28,7 @@ struct QuickNotesView: View {
                     .keyboardShortcut(.return, modifiers: [.command])
                     .disabled(note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 Button("Save & Copy") { save(copy: true) }
-                    .buttonStyle(.borderedProminent)
+                    .primaryActionStyle()
                     .disabled(note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }

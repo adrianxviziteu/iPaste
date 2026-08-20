@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Nocket">
+  <defs>
+    <linearGradient id="nocket-bg" x1=".08" y1="0" x2=".92" y2="1">
+      <stop offset="0" stop-color="#8394f7"/>
+      <stop offset=".45" stop-color="#4257e0"/>
+      <stop offset="1" stop-color="#1b2358"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="29" fill="url(#nocket-bg)"/>
+  <path fill="#fff" d="M32 0h64v42a24 24 0 0 1-24 24H56a24 24 0 0 1-24-24V0Z"/>
+</svg>
