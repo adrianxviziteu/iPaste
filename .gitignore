@@ -4,6 +4,9 @@
 # Locally bundled app artifacts
 build/
 
+# Release archives
+dist/
+
 # macOS
 .DS_Store
 

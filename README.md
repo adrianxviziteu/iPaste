@@ -42,6 +42,45 @@ v1 — the working core. Built with SwiftUI and SwiftPM, without Xcode.
 The script compiles, assembles `iPaste.app` and signs it ad-hoc. The app has no
 Dock icon — look for it in the menu bar, top right.
 
+## Publishing a download
+
+The website's download buttons point to the latest GitHub Release asset:
+`iPaste.zip`. Create the archive locally with:
+
+```bash
+./Scripts/package-release.sh release
+```
+
+Push a version tag (for example, `v0.1.0`) to run the GitHub Actions release
+workflow. It builds the app on macOS, uploads `iPaste.zip`, and publishes the
+SHA-256 checksum alongside it.
+
+### What people who download it will hit
+
+Gatekeeper refuses this build. That is not a bug in the archive - macOS only
+opens downloaded apps signed with an Apple **Developer ID** and notarized by
+Apple, which needs a paid Apple Developer account. Everything else, including a
+self-signed certificate or the ad-hoc signature the CI runner falls back to, is
+rejected on arrival:
+
+```
+spctl -a -t exec -vv build/iPaste.app
+build/iPaste.app: rejected
+```
+
+So a downloader sees a warning that iPaste cannot be opened, or that it is
+damaged. Until the app is notarized, tell them to open it once with:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/iPaste.app
+```
+
+Or, without a terminal: right-click the app, choose **Open**, then confirm.
+macOS remembers the choice for that copy.
+
+Building from source has no such problem - a locally built app was never
+quarantined, so `./Scripts/bundle.sh` just works.
+
 Pasting needs macOS **Accessibility** permission:
 System Settings → Privacy & Security → Accessibility → add `iPaste.app`.
 Without it iPaste still works, but it only places content on the clipboard and
@@ -112,6 +151,11 @@ Sources/iPaste/
     Theme.swift            visual constants, in one place
     Onboarding/            the first-run guide
 ```
+
+## License
+
+MIT - see [LICENSE](LICENSE). Use it, change it, ship it, sell it; just keep the
+copyright notice. No warranty.
 
 ## Where the data lives
 

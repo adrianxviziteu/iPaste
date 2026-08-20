@@ -148,38 +148,9 @@ document.querySelectorAll('.filter, .device-pills span').forEach((pill) => {
   });
 });
 
-const modal = document.querySelector('.modal');
-const notifyButtons = document.querySelectorAll('.notify-button');
-const closeModal = document.querySelector('.modal-close');
-const emailInput = document.querySelector('#email');
-
-const openModal = (event) => {
-  event?.preventDefault();
-  modal.classList.add('is-open');
-  modal.setAttribute('aria-hidden', 'false');
-  window.setTimeout(() => emailInput?.focus(), 100);
-};
-
-const hideModal = () => {
-  modal.classList.remove('is-open');
-  modal.setAttribute('aria-hidden', 'true');
-};
-
-notifyButtons.forEach((button) => button.addEventListener('click', openModal));
-closeModal?.addEventListener('click', hideModal);
-modal?.addEventListener('click', (event) => {
-  if (event.target === modal) hideModal();
-});
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
-    hideModal();
     setMobileMenu(false);
     setNotchShelf(false, false);
   }
-});
-
-document.querySelector('.notify-form')?.addEventListener('submit', (event) => {
-  event.preventDefault();
-  event.currentTarget.hidden = true;
-  document.querySelector('.form-success').hidden = false;
 });
