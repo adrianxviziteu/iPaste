@@ -1400,54 +1400,25 @@ img.app-icon{background:none;box-shadow:none;border-radius:0}
   .footer-inner{padding:44px 0 60px}
 }
 
-/* FAQ → CTA: a shorter, cool-tinted fade keeps the handoff soft without
-   leaving a large empty band between the last question and the CTA copy. */
-.faq{padding-bottom:12px}
+/* FAQ → CTA: the CTA arrives as a dark drawer with rounded shoulders instead
+   of a long gradient band. */
+.faq{padding-bottom:42px}
 .download-section{
-  background:
-    radial-gradient(72% 90px at 50% 0,rgba(255,255,255,.86),transparent 76%),
-    radial-gradient(85% 42% at 50% 76%,rgba(56,74,116,.2),transparent 72%),
-    linear-gradient(180deg,
-      #ffffff 0px,
-      #ffffff 24px,
-      #f8fbff 42px,
-      #f0f6fc 60px,
-      #e4eff8 78px,
-      #d2e2f1 96px,
-      #b4cbe0 114px,
-      #91acc7 132px,
-      #6f89a7 150px,
-      #4b617d 168px,
-      #2e3d53 184px,
-      #182333 200px,
-      #0a0f17 214px,
-      #050608 228px,
-      #050608 244px);
+  padding-inline:0;
+  background:var(--page);
 }
-.download-inner{padding-top:150px}
+.download-inner{
+  padding:84px 20px 78px;
+  border:1px solid rgba(255,255,255,.08);
+  border-bottom:0;
+  border-radius:56px 56px 0 0;
+  background:#050608;
+  box-shadow:0 -14px 36px rgba(14,24,45,.07),0 1px 0 rgba(255,255,255,.08) inset;
+}
 @media(max-width:850px){
-  .download-inner{padding-top:132px}
+  .download-inner{padding-top:72px;border-radius:44px 44px 0 0}
 }
 @media(max-width:600px){
-  .faq{padding-bottom:8px}
-  .download-section{
-    background:
-      radial-gradient(110% 72px at 50% 0,rgba(255,255,255,.86),transparent 76%),
-      radial-gradient(110% 38% at 50% 74%,rgba(56,74,116,.18),transparent 72%),
-      linear-gradient(180deg,
-        #ffffff 0px,
-        #ffffff 18px,
-        #f8fbff 32px,
-        #eef4fa 46px,
-        #dcebf7 60px,
-        #c4d9eb 74px,
-        #9db6cf 88px,
-        #7089a5 102px,
-        #475b74 116px,
-        #28384d 130px,
-        #111925 144px,
-        #050608 158px,
-        #050608 172px);
-  }
-  .download-inner{padding-top:104px}
+  .faq{padding-bottom:30px}
+  .download-inner{padding:58px 14px 60px;border-radius:32px 32px 0 0}
 }
