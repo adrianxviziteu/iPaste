@@ -1,8 +1,38 @@
+<div align="center">
+
+<img src="website/assets/ipaste-icon.png" width="88" height="88" alt="iPaste icon" />
+
 # iPaste
 
+**Your clipboard, right in the notch.**
+
 A clipboard manager for macOS: it remembers everything you copy, sorts it by
-kind on its own, and hands it back in seconds — from the menu bar, from a quick
-search window, or from a shelf that drops out of the top edge of the screen.
+kind on its own, and hands it back in seconds — from the menu bar, from a
+quick search window, or from a shelf that drops out of the top edge of the
+screen.
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey)](#running-it)
+[![Swift](https://img.shields.io/badge/swift-6.0-orange)](Package.swift)
+[![Latest release](https://img.shields.io/github/v/release/adrianxviziteu/iPaste)](https://github.com/adrianxviziteu/iPaste/releases/latest)
+
+[Website](https://ipaste.app) · [Download](https://github.com/adrianxviziteu/iPaste/releases/latest) · [Report a bug](https://github.com/adrianxviziteu/iPaste/issues)
+
+</div>
+
+---
+
+## Contents
+
+- [Status](#status)
+- [Running it](#running-it)
+- [Publishing a download](#publishing-a-download)
+- [Stable signing](#stable-signing)
+- [Shortcuts](#shortcuts)
+- [How the code is laid out](#how-the-code-is-laid-out)
+- [Contributing](#contributing)
+- [License](#license)
+- [Where the data lives](#where-the-data-lives)
 
 ## Status
 
@@ -135,7 +165,7 @@ Sources/iPaste/
   Core/
     ClipboardMonitor.swift watches the pasteboard, classifies what arrives
     ClipStore.swift        the history: memory, JSON on disk, images beside it
-    Paster.swift           writes to the pasteboard and sends ⌘V to the active app
+    Paster.swift            writes to the pasteboard and sends ⌘V to the active app
     HotKeyCenter.swift     global shortcuts, via Carbon
     ShelfHoverMonitor.swift detects the cursor reaching the top edge
     AppState.swift         ties it together and owns the windows
@@ -151,6 +181,14 @@ Sources/iPaste/
     Theme.swift            visual constants, in one place
     Onboarding/            the first-run guide
 ```
+
+## Contributing
+
+Bug reports, feature ideas, and pull requests are welcome — see
+[CONTRIBUTING.md](CONTRIBUTING.md) for how to get set up and what makes a
+good PR. This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md).
+Found a security issue? Please follow [SECURITY.md](SECURITY.md) instead of
+opening a public issue.
 
 ## License
 
