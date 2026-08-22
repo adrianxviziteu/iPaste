@@ -1535,7 +1535,5 @@ img.app-icon{background:none;box-shadow:none;border-radius:0}
   .legal-sidebar a,.legal-back,.legal-points>div,.legal-note,.legal-cta .hero-button{transition:none!important}
 }
 
-/* Keep the desktop laptop overlap visual, but leave the intro heading clear. */
-@media(min-width:851px){
-  .image-macbook{margin-bottom:-48px}
-}
+/* Keep the laptop in flow so the intro heading starts below its visible base. */
+.image-macbook{margin-bottom:0}
