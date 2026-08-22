@@ -37,14 +37,15 @@ enum Theme {
     static let onboardingHeroHeight: CGFloat = 205
     static let onboardingCornerRadius: CGFloat = 28
 
-    /// A translucent backing, so a panel sits over content without hiding it.
+    /// A near-black backing: the main panels should feel solid, with only small
+    /// controls carrying the app's restrained glass accents.
     struct PanelBackground: View {
         var body: some View {
             RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(Color(red: 0.018, green: 0.021, blue: 0.027))
                 .overlay(
                     RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
                 )
         }
     }
@@ -57,45 +58,17 @@ extension Color {
 }
 
 extension View {
-    /// The app's one primary-action look: real glass on macOS 26+, the
-    /// system's bordered-prominent button everywhere else.
-    @ViewBuilder
+    /// Primary actions stay solid and readable; glass is reserved for small
+    /// secondary controls.
     func primaryActionStyle() -> some View {
-        if #available(macOS 26.0, *) {
-            buttonStyle(.glassProminent)
-        } else {
-            buttonStyle(.borderedProminent)
-        }
+        buttonStyle(.borderedProminent)
     }
 
-    /// Rounded corners plus panel backing, shared by every floating window.
-    ///
-    /// On macOS 26+ this is real Liquid Glass; older systems keep the
-    /// `.ultraThinMaterial` look this app shipped with before.
-    @ViewBuilder
+    /// Rounded corners plus a solid black backing, shared by every floating
+    /// window. Small controls can still opt into the restrained glass accent.
     func panelChrome() -> some View {
-        if #available(macOS 26.0, *) {
-            self
-                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [.white.opacity(0.35), .white.opacity(0.05)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1
-                        )
-                }
-                // glassEffect only shapes the backing, not the content in front of
-                // it — without this, the result list squares off past the corners
-                // instead of being cut by them.
-                .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-        } else {
-            self
-                .background(Theme.PanelBackground())
-                .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
-        }
+        self
+            .background(Theme.PanelBackground())
+            .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
     }
 }

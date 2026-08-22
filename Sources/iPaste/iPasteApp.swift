@@ -48,6 +48,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     ) {
         DispatchQueue.main.async {
             MainActor.assumeIsolated {
+                if let clipID = response.notification.request.content.userInfo["clipID"] as? String {
+                    AppState.shared.acknowledgeReminder(clipID: clipID)
+                }
                 NSApp.activate(ignoringOtherApps: true)
                 AppState.shared.showQuickSearch()
             }

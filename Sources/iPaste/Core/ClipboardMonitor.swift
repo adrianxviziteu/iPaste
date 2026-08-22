@@ -16,11 +16,13 @@ final class ClipboardMonitor {
     private var timer: Timer?
     private var screenshotTimer: Timer?
     private var lastChangeCount: Int
-    /// Set while *we* write to the pasteboard, so we don't re-capture our own paste.
-    private var ignoreNextChangeCount: Int?
+    /// The pasteboard count after an iPaste write has completed. A write can
+    /// produce more than one change, so never predict this value in advance.
+    private var ignoredChangesThrough: Int?
     /// Kept for Text Capture if the polling timer observes the copy before the
     /// explicit import callback runs.
     private var explicitCaptureChangeCount: Int?
+    private var explicitCaptureBaseline: Int?
     private var knownScreenshotPaths = Set<String>()
 
     /// Types other apps use to say "do not remember this" — password managers and such.
@@ -64,15 +66,15 @@ final class ClipboardMonitor {
         screenshotTimer = nil
     }
 
-    /// Called before we write to the pasteboard, so the change doesn't come back as a new clip.
-    func suppressNextChange() {
-        ignoreNextChangeCount = NSPasteboard.general.changeCount + 1
+    /// Called after iPaste finishes writing to the pasteboard.
+    func ignoreOwnChanges(through changeCount: Int) {
+        ignoredChangesThrough = changeCount
         explicitCaptureChangeCount = nil
     }
 
     func prepareForExplicitCapture() {
-        ignoreNextChangeCount = NSPasteboard.general.changeCount + 1
-        explicitCaptureChangeCount = ignoreNextChangeCount
+        explicitCaptureBaseline = NSPasteboard.general.changeCount
+        explicitCaptureChangeCount = nil
     }
 
     // MARK: - Capture
@@ -82,11 +84,19 @@ final class ClipboardMonitor {
         let changeCount = pasteboard.changeCount
         guard changeCount != lastChangeCount else { return }
 
-        if let ignored = ignoreNextChangeCount, ignored == changeCount {
-            ignoreNextChangeCount = nil
-            if explicitCaptureChangeCount != changeCount {
-                explicitCaptureChangeCount = nil
+        if let ignored = ignoredChangesThrough {
+            // If another app changed the pasteboard after our write but before
+            // the next poll, capture that newer content instead of swallowing it.
+            ignoredChangesThrough = nil
+            if changeCount <= ignored {
+                lastChangeCount = changeCount
+                return
             }
+        }
+
+        if let baseline = explicitCaptureBaseline, changeCount > baseline {
+            explicitCaptureBaseline = nil
+            explicitCaptureChangeCount = changeCount
             lastChangeCount = changeCount
             return
         }
@@ -95,6 +105,19 @@ final class ClipboardMonitor {
         guard !preferences.ignores(bundleID: NSWorkspace.shared.frontmostApplication?.bundleIdentifier) else {
             return
         }
+        let app = NSWorkspace.shared.frontmostApplication
+        if app?.bundleIdentifier != Bundle.main.bundleIdentifier,
+           let image = imageFromPasteboard(pasteboard),
+           let data = image.tiffRepresentation {
+            captureImage(
+                image,
+                data: data,
+                sourceAppName: app?.localizedName,
+                sourceBundleID: app?.bundleIdentifier
+            )
+            return
+        }
+
         guard let clip = makeClip(from: pasteboard) else { return }
 
         _ = storeCapturedClip(clip)
@@ -110,17 +133,25 @@ final class ClipboardMonitor {
         let isExplicitChange = explicitCaptureChangeCount == changeCount
         guard changeCount != lastChangeCount || isExplicitChange else {
             // A failed selection copy must not suppress the user's next normal copy.
-            ignoreNextChangeCount = nil
+            explicitCaptureBaseline = nil
             explicitCaptureChangeCount = nil
             return false
         }
         lastChangeCount = changeCount
-        ignoreNextChangeCount = nil
+        explicitCaptureBaseline = nil
         explicitCaptureChangeCount = nil
 
         guard !isConcealed(pasteboard),
               !preferences.ignores(bundleID: NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
         else { return false }
+
+        if !textOnly,
+           let image = imageFromPasteboard(pasteboard),
+           let data = image.tiffRepresentation {
+            let app = NSWorkspace.shared.frontmostApplication
+            captureImage(image, data: data, sourceAppName: app?.localizedName, sourceBundleID: app?.bundleIdentifier)
+            return true
+        }
 
         let clip: Clip?
         if textOnly {
@@ -136,9 +167,12 @@ final class ClipboardMonitor {
     /// Captures content dropped directly on the notch trigger panel.
     @discardableResult
     func captureDroppedPasteboard(_ pasteboard: NSPasteboard) -> Bool {
-        guard !isConcealed(pasteboard),
-              let clip = makeClip(from: pasteboard, allowSelfSource: true)
-        else { return false }
+        guard !isConcealed(pasteboard) else { return false }
+        if let image = imageFromPasteboard(pasteboard), let data = image.tiffRepresentation {
+            captureImage(image, data: data, sourceAppName: "Drag & Drop", sourceBundleID: "com.ipaste.drag-drop")
+            return true
+        }
+        guard let clip = makeClip(from: pasteboard, allowSelfSource: true) else { return false }
         return storeCapturedClip(clip)
     }
 
@@ -190,7 +224,7 @@ final class ClipboardMonitor {
     private func startScreenshotMonitor() {
         knownScreenshotPaths = Set(screenshotURLs().map(\.path))
         screenshotTimer?.invalidate()
-        screenshotTimer = Timer(timeInterval: 0.75, repeats: true) { [weak self] _ in
+        screenshotTimer = Timer(timeInterval: 2.0, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.pollScreenshots() }
         }
         if let screenshotTimer {
@@ -199,29 +233,18 @@ final class ClipboardMonitor {
     }
 
     private func pollScreenshots() {
-        for url in screenshotURLs() where !knownScreenshotPaths.contains(url.path) {
+        let urls = screenshotURLs()
+        knownScreenshotPaths.formIntersection(Set(urls.map(\.path)))
+        for url in urls where !knownScreenshotPaths.contains(url.path) {
             guard let image = NSImage(contentsOf: url),
                   let data = try? Data(contentsOf: url),
-                  !data.isEmpty,
-                  let filename = store.storeImage(image)
+                  !data.isEmpty
             else { continue }
 
             knownScreenshotPaths.insert(url.path)
             let resourceValues = try? url.resourceValues(forKeys: [.creationDateKey])
             let createdAt = resourceValues?.creationDate ?? Date()
-            let clip = Clip(
-                kind: .image,
-                text: "(Int(image.size.width))×(Int(image.size.height))",
-                imageFilename: filename,
-                sourceAppName: "Screenshot",
-                sourceBundleID: "com.apple.screencapture",
-                createdAt: createdAt,
-                fingerprint: Self.fingerprint(data),
-                byteSize: data.count
-            )
-            let stored = store.insert(clip)
-            onCapture?(stored)
-            scheduleOCR(for: stored)
+            captureImage(image, data: data, sourceAppName: "Screenshot", sourceBundleID: "com.apple.screencapture", createdAt: createdAt)
         }
     }
 
@@ -280,7 +303,7 @@ final class ClipboardMonitor {
         // Files come first: a file copied in Finder also arrives as text and as an image.
         if let urls = pasteboard.readObjects(forClasses: [NSURL.self], options: [
             .urlReadingFileURLsOnly: true
-        ]) as? [URL], let url = urls.first {
+        ]) as? [URL], !urls.isEmpty {
             let paths = urls.map(\.path).joined(separator: "\n")
             return Clip(
                 kind: urls.count > 1 ? .multi : .file,
@@ -288,21 +311,7 @@ final class ClipboardMonitor {
                 sourceAppName: appName,
                 sourceBundleID: bundleID,
                 fingerprint: Self.fingerprint(paths),
-                byteSize: fileSize(of: url)
-            )
-        }
-
-        if let image = imageFromPasteboard(pasteboard) {
-            guard let filename = store.storeImage(image) else { return nil }
-            let data = image.tiffRepresentation ?? Data()
-            return Clip(
-                kind: .image,
-                text: "\(Int(image.size.width))×\(Int(image.size.height))",
-                imageFilename: filename,
-                sourceAppName: appName,
-                sourceBundleID: bundleID,
-                fingerprint: Self.fingerprint(data),
-                byteSize: data.count
+                byteSize: urls.reduce(0) { $0 + fileSize(of: $1) }
             )
         }
 
@@ -353,19 +362,8 @@ final class ClipboardMonitor {
     }
 
     private func captureDroppedImage(_ image: NSImage) {
-        guard let data = image.tiffRepresentation,
-              let filename = store.storeImage(image)
-        else { return }
-        let clip = Clip(
-            kind: .image,
-            text: "(Int(image.size.width))×(Int(image.size.height))",
-            imageFilename: filename,
-            sourceAppName: "Drag & Drop",
-            sourceBundleID: "com.ipaste.drag-drop",
-            fingerprint: Self.fingerprint(data),
-            byteSize: data.count
-        )
-        _ = storeCapturedClip(clip)
+        guard let data = image.tiffRepresentation else { return }
+        captureImage(image, data: data, sourceAppName: "Drag & Drop", sourceBundleID: "com.ipaste.drag-drop")
     }
 
     private func captureDroppedFile(_ url: URL) {
@@ -382,7 +380,7 @@ final class ClipboardMonitor {
     }
 
     @discardableResult
-    private func storeCapturedClip(_ clip: Clip) -> Bool {
+    private func storeCapturedClip(_ clip: Clip, imageWasChecked: Bool = false) -> Bool {
         if preferences.sensitiveContentProtection,
            clip.kind != .image,
            SensitiveContentDetector.isSensitive(clip.text) {
@@ -390,9 +388,55 @@ final class ClipboardMonitor {
             return false
         }
         let stored = store.insert(clip)
+        if stored.id != clip.id, let filename = clip.imageFilename {
+            store.discardImage(named: filename)
+        }
         onCapture?(stored)
-        if stored.kind == .image { scheduleOCR(for: stored) }
+        if stored.kind == .image && !imageWasChecked { scheduleOCR(for: stored) }
         return true
+    }
+
+    /// OCR before writing an image keeps detected sensitive screenshots out of
+    /// the local image directory and history database.
+    private func captureImage(
+        _ image: NSImage,
+        data: Data,
+        sourceAppName: String?,
+        sourceBundleID: String?,
+        createdAt: Date = Date()
+    ) {
+        let fingerprint = Self.fingerprint(data)
+        let dimensions = "\(Int(image.size.width))×\(Int(image.size.height))"
+
+        if store.containsClip(fingerprint: fingerprint) {
+            let duplicate = Clip(kind: .image, text: dimensions, sourceAppName: sourceAppName,
+                                 sourceBundleID: sourceBundleID, createdAt: createdAt,
+                                 fingerprint: fingerprint, byteSize: data.count)
+            _ = storeCapturedClip(duplicate, imageWasChecked: true)
+            return
+        }
+
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let ocrText = Self.recognizeText(in: data)
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                if self.preferences.sensitiveContentProtection,
+                   let ocrText,
+                   SensitiveContentDetector.isSensitive(ocrText) {
+                    let rejected = Clip(kind: .image, text: dimensions, sourceAppName: sourceAppName,
+                                        sourceBundleID: sourceBundleID, createdAt: createdAt,
+                                        fingerprint: fingerprint, byteSize: data.count)
+                    self.onSensitiveCapture?(rejected)
+                    return
+                }
+
+                guard let filename = self.store.storeImage(image) else { return }
+                let clip = Clip(kind: .image, text: dimensions, imageFilename: filename, ocrText: ocrText,
+                                sourceAppName: sourceAppName, sourceBundleID: sourceBundleID,
+                                createdAt: createdAt, fingerprint: fingerprint, byteSize: data.count)
+                _ = self.storeCapturedClip(clip, imageWasChecked: true)
+            }
+        }
     }
 
     private func imageFromPasteboard(_ pasteboard: NSPasteboard) -> NSImage? {
@@ -402,8 +446,7 @@ final class ClipboardMonitor {
         return NSImage(pasteboard: pasteboard)
     }
 
-    /// OCR runs after the image is safely stored, so the polling loop never
-    /// blocks while Vision analyzes a large screenshot.
+    /// Backfills OCR for images saved by older versions of the app.
     private func scheduleOCR(for clip: Clip) {
         guard let imageURL = store.imageURL(for: clip) else { return }
         let clipID = clip.id

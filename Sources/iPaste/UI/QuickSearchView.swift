@@ -11,11 +11,14 @@ struct QuickSearchView: View {
     @State private var selectedIndex = 0
     @State private var kindFilter: ClipKind?
     @State private var categoryFilter: String?
+    @State private var semanticSearch = false
     @FocusState private var searchFocused: Bool
     @Namespace private var selectionNamespace
 
     private var results: [Clip] {
-        store.clips(matching: query, kind: kindFilter, category: categoryFilter)
+        semanticSearch
+            ? store.semanticClips(matching: query, kind: kindFilter, category: categoryFilter)
+            : store.clips(matching: query, kind: kindFilter, category: categoryFilter)
     }
 
     var body: some View {
@@ -29,6 +32,7 @@ struct QuickSearchView: View {
         }
         .frame(width: Theme.panelWidth, height: Theme.panelHeight)
         .panelChrome()
+        .environment(\.colorScheme, .dark)
         .onAppear {
             searchFocused = true
             selectedIndex = 0
@@ -61,7 +65,7 @@ struct QuickSearchView: View {
 
     private var filterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            glassChipRow {
+            chipRow {
                 filterChip(title: "All", kind: nil)
                 ForEach(ClipKind.allCases, id: \.self) { kind in
                     filterChip(title: kind.label, kind: kind)
@@ -73,23 +77,27 @@ struct QuickSearchView: View {
                         categoryChip(category)
                     }
                 }
+                Button {
+                    semanticSearch.toggle()
+                    selectedIndex = 0
+                } label: {
+                    Label("Local semantic", systemImage: "sparkles")
+                        .font(.system(size: 11, weight: .medium))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .chipBackground(isActive: semanticSearch)
+                }
+                .buttonStyle(.plain)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
         }
     }
 
-    /// Groups the filter pills into one glass sampling region on macOS 26+, so
-    /// nearby chips read as a single surface instead of independent blobs.
-    @ViewBuilder
-    private func glassChipRow(@ViewBuilder content: () -> some View) -> some View {
-        if #available(macOS 26.0, *) {
-            GlassEffectContainer(spacing: 6) {
-                HStack(spacing: 6, content: content)
-            }
-        } else {
-            HStack(spacing: 6, content: content)
-        }
+    /// Keeps the filter row compact; only the individual chips use the
+    /// restrained glass accent below.
+    private func chipRow(@ViewBuilder content: () -> some View) -> some View {
+        HStack(spacing: 6, content: content)
     }
 
     private func filterChip(title: String, kind: ClipKind?) -> some View {
@@ -179,6 +187,12 @@ struct QuickSearchView: View {
             hint("⌘↩", preferences.clickActivation == .copy ? "paste" : "copy")
             hint("↑↓", "navigate")
             hint("esc", "close")
+            if !store.stack.isEmpty {
+                Button("Paste stack (\(store.stack.count))") { app.pasteStack() }
+                    .font(.system(size: 10, weight: .medium))
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Color.accentColor)
+            }
             Spacer()
             Text("\(results.count) \(results.count == 1 ? "clip" : "clips")")
                 .font(.system(size: 10))
@@ -208,6 +222,28 @@ struct QuickSearchView: View {
         Button("Copy") { app.copy(clip) }
         Divider()
         Button(clip.pinned ? "Unpin" : "Pin") { store.togglePin(clip) }
+        Button(store.stackIDs.contains(clip.id) ? "Remove from stack" : "Add to stack") {
+            store.toggleStack(clip)
+        }
+        if !ClipAction.available(for: clip).isEmpty {
+            Menu("Quick actions") {
+                ForEach(ClipAction.available(for: clip)) { action in
+                    Button(action.label) { app.apply(action, to: clip) }
+                }
+            }
+        }
+        if clip.kind != .multi {
+            Button("Share temporarily…") { app.shareTemporarily(clip) }
+        }
+        Menu("Snippet") {
+            Button("Use query as shortcut") {
+                let value = query.hasPrefix(";") ? query : ";\(query)"
+                _ = store.setShortcut(value, for: clip)
+            }
+            if clip.shortcut != nil {
+                Button("Remove shortcut") { _ = store.setShortcut(nil, for: clip) }
+            }
+        }
         ClipReminderMenu(clip: clip)
         Button("Delete", role: .destructive) { store.delete(clip) }
     }
@@ -226,8 +262,8 @@ struct QuickSearchView: View {
 }
 
 private extension View {
-    /// Filter-pill backing: real glass on macOS 26+, the original tinted
-    /// capsule fill everywhere else.
+    /// Small filter pills retain a restrained glass accent; the main search
+    /// surface remains solid black.
     @ViewBuilder
     func chipBackground(isActive: Bool) -> some View {
         if #available(macOS 26.0, *) {

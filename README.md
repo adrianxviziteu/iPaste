@@ -50,19 +50,18 @@ v1 — the working core. Built with SwiftUI and SwiftPM, without Xcode.
 | Shelf modes: always open, on hover, never | done |
 | Collections: create, rename, delete, move clips between them | done |
 | ⌃⌘0–9 for the ten most recent clips | done |
-| Library window: sidebar, grid, detail pane | removed — iPaste stays in the menu bar and notch |
+| Library window: sidebar, grid, detail pane | done — open with ⌃⌘L |
 | Menu bar menu and launch at login | done |
 | First-run guide | done |
 | Screenshot and image OCR (Vision) | done |
 | Ignored applications for sensitive clipboard data | done |
 | Sensitive-content detection for passwords, keys, tokens and card numbers | done |
 | Filter by source application and Smart Auto-Filter | done |
-| iCloud Drive sync engine | done; requires Apple iCloud entitlement |
 | Automatic deletion after N days, with pinned clips preserved | done |
 | Dedicated Settings window | done |
 | Color Picker, Text Capture and Quick Notes | done |
-| Inline shortcuts (`;hello`) | next |
-| Multi-clip copy, clip reminders, iCloud sync | later |
+| Snippets (`;hello`) for quick search and paste | done |
+| Multi-clip copy, clip reminders | later |
 
 ## Running it
 

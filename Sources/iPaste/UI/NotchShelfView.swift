@@ -1565,37 +1565,11 @@ struct ShelfCard: View {
 }
 
 private extension View {
-    /// The shelf's own backing: real glass on macOS 26+, the original solid
-    /// black everywhere else.
-    ///
-    /// A light tint, not a solid one — a full black tint reads as tinted
-    /// plastic and hides the actual glass refraction of the desktop behind
-    /// it. The rim gradient is the same top-lit highlight Apple draws around
-    /// its own glass (Control Center, the notch), so the edge still catches
-    /// light even in a static screenshot.
-    @ViewBuilder
+    /// The shelf is predominantly solid black. Glass stays limited to the
+    /// small controls inside it so the old, focused silhouette remains intact.
     func shelfChrome() -> some View {
-        if #available(macOS 26.0, *) {
-            glassEffect(.regular.tint(.black.opacity(0.45)), in: BottomRoundedRectangle(radius: Theme.shelfCornerRadius))
-                .overlay {
-                    BottomRoundedRectangle(radius: Theme.shelfCornerRadius)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.white.opacity(0.32), .white.opacity(0.04)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1
-                        )
-                }
-                // glassEffect only shapes the backing, not the content in front of
-                // it — without this, scrolling cards/rows square off past the
-                // rounded corners instead of being cut by them.
-                .clipShape(BottomRoundedRectangle(radius: Theme.shelfCornerRadius))
-        } else {
-            background(Color.black)
-                .clipShape(BottomRoundedRectangle(radius: Theme.shelfCornerRadius))
-        }
+        background(Color.black)
+            .clipShape(BottomRoundedRectangle(radius: Theme.shelfCornerRadius))
     }
 
     /// The small round icon buttons in the shelf's toolbar row.
@@ -1614,32 +1588,14 @@ private extension View {
         }
     }
 
-    /// The clip inspector panel: untinted glass, deliberately lighter than the
-    /// shelf it sits on so the two surfaces read as distinct panes of glass
-    /// instead of one flat black slab.
-    @ViewBuilder
+    /// The clip inspector stays black like the shelf, with a quiet rim so it
+    /// reads as a separate panel without becoming another glass surface.
     func inspectorChrome() -> some View {
-        if #available(macOS 26.0, *) {
-            glassEffect(.regular, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.white.opacity(0.28), .white.opacity(0.06)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1
-                        )
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        } else {
-            background(Color.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .strokeBorder(Color.white.opacity(0.11), lineWidth: 1)
-                }
-        }
+        background(Color.black.opacity(0.96), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.11), lineWidth: 1)
+            }
     }
 
     /// A small glass capsule pill, for the badges and buttons scattered

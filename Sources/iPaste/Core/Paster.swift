@@ -25,7 +25,6 @@ final class Paster {
 
     /// Puts the clip on the clipboard without pasting anything.
     func copyToPasteboard(_ clip: Clip) {
-        monitor.suppressNextChange()
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
 
@@ -46,6 +45,7 @@ final class Paster {
         default:
             pasteboard.setString(clip.text, forType: .string)
         }
+        monitor.ignoreOwnChanges(through: pasteboard.changeCount)
     }
 
     /// Copies, hands focus back to the previous app, then sends ⌘V.
@@ -63,6 +63,21 @@ final class Paster {
 
         // An app that just got focus needs a few tens of ms before it accepts events.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            Self.sendCommandV()
+        }
+    }
+
+    /// Replaces the just-typed shortcut in the already-focused application.
+    /// Unlike normal paste this must not reactivate `previousApp`, because the
+    /// global keyboard monitor is responding to the app that is focused now.
+    func expandSnippet(_ text: String, replacingLastTypedCharacters count: Int) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        monitor.ignoreOwnChanges(through: pasteboard.changeCount)
+        guard hasAccessibilityPermission(prompt: true) else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.015) {
+            for _ in 0..<count { Self.sendDelete() }
             Self.sendCommandV()
         }
     }
@@ -124,6 +139,13 @@ final class Paster {
         keyUp?.flags = .maskCommand
         keyDown?.post(tap: .cgAnnotatedSessionEventTap)
         keyUp?.post(tap: .cgAnnotatedSessionEventTap)
+    }
+
+    private static func sendDelete() {
+        guard let source = CGEventSource(stateID: .combinedSessionState) else { return }
+        let keyCode: CGKeyCode = 0x33
+        CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true)?.post(tap: .cgAnnotatedSessionEventTap)
+        CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false)?.post(tap: .cgAnnotatedSessionEventTap)
     }
 
     /// Tracks who is frontmost, so we know where to paste once our own window opens.

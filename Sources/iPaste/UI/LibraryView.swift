@@ -7,6 +7,7 @@ enum LibraryFilter: Hashable {
     case pinned
     case category(String)
     case kind(ClipKind)
+    case source(String)
 }
 
 /// The full window: a sidebar of collections and kinds, a grid of clips, and a
@@ -33,6 +34,8 @@ struct LibraryView: View {
             base = store.clips(matching: query, category: name)
         case .kind(let kind):
             base = store.clips(matching: query, kind: kind)
+        case .source(let app):
+            base = store.clips(matching: query).filter { ($0.sourceAppName ?? "Unknown") == app }
         }
         return base
     }
@@ -103,6 +106,27 @@ struct LibraryView: View {
                     let count = store.clips.count { $0.kind == kind }
                     if count > 0 {
                         row(.kind(kind), kind.label, kind.symbol, count)
+                    }
+                }
+            }
+
+            let sources = Dictionary(grouping: store.clips, by: { $0.sourceAppName ?? "Unknown" })
+            if !sources.isEmpty {
+                Section("Applications") {
+                    ForEach(sources.keys.sorted(), id: \.self) { source in
+                        row(.source(source), source, "app", sources[source]?.count ?? 0)
+                    }
+                }
+            }
+
+            if !store.smartFavorites.isEmpty {
+                Section("Suggested favorites") {
+                    ForEach(store.smartFavorites.prefix(3)) { clip in
+                        Button(clip.title.truncated(to: 26)) { selectedID = clip.id }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button("Pin suggestion") { store.acceptFavoriteSuggestion(clip) }
+                            }
                     }
                 }
             }
@@ -245,6 +269,17 @@ struct LibraryView: View {
         Button("Copy") { app.copy(clip) }
         Divider()
         Button(clip.pinned ? "Unpin" : "Pin") { store.togglePin(clip) }
+        Button(store.stackIDs.contains(clip.id) ? "Remove from stack" : "Add to stack") { store.toggleStack(clip) }
+        if !ClipAction.available(for: clip).isEmpty {
+            Menu("Quick actions") {
+                ForEach(ClipAction.available(for: clip)) { action in
+                    Button(action.label) { app.apply(action, to: clip) }
+                }
+            }
+        }
+        if clip.kind != .multi {
+            Button("Share temporarily…") { app.shareTemporarily(clip) }
+        }
         ClipReminderMenu(clip: clip)
         if !store.categories.isEmpty {
             Menu("Move to collection") {
@@ -290,11 +325,21 @@ struct LibraryView: View {
                     ClipPreview(clip: clip)
                         .frame(maxWidth: .infinity)
 
+                    if ![ClipKind.image, .file, .multi].contains(clip.kind) {
+                        ClipEditor(clip: clip)
+                        Menu("Quick actions") {
+                            ForEach(ClipAction.available(for: clip)) { action in
+                                Button(action.label) { app.apply(action, to: clip) }
+                            }
+                        }
+                    }
+
                     VStack(alignment: .leading, spacing: 6) {
                         detailRow("Kind", clip.kind.label)
                         if let appName = clip.sourceAppName { detailRow("App", appName) }
                         detailRow("Copied", clip.createdAt.formatted(date: .abbreviated, time: .shortened))
                         if let reminder = clip.reminder { detailRow("Reminder", reminder.label) }
+                        detailRow("Used", "\(clip.useCount) times")
                         if clip.byteSize > 0 { detailRow("Size", clip.byteSize.formattedByteSize) }
                         detailRow("Collection", clip.category ?? "—")
                         if let ocr = clip.ocrText, !ocr.isEmpty {
@@ -306,6 +351,9 @@ struct LibraryView: View {
                         Button("Paste") { app.paste(clip) }
                             .primaryActionStyle()
                         Button("Copy") { app.copy(clip) }
+                        Button(store.stackIDs.contains(clip.id) ? "Remove stack" : "Add stack") {
+                            store.toggleStack(clip)
+                        }
                         Spacer()
                         Button {
                             store.togglePin(clip)
@@ -334,6 +382,41 @@ struct LibraryView: View {
                 .font(.system(size: 11))
                 .textSelection(.enabled)
             Spacer(minLength: 0)
+        }
+    }
+}
+
+private struct ClipEditor: View {
+    let clip: Clip
+    @EnvironmentObject private var store: ClipStore
+    @State private var draft = ""
+    @State private var shortcut = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text("Edit before paste").font(.system(size: 12, weight: .semibold))
+            TextEditor(text: $draft)
+                .font(.system(size: 11, design: clip.kind == .code ? .monospaced : .default))
+                .frame(minHeight: 88)
+                .padding(5)
+                .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 7))
+            HStack {
+                TextField("Snippet, e.g. ;email", text: $shortcut)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 11))
+                Button("Save") {
+                    store.updateText(draft, for: clip)
+                    _ = store.setShortcut(shortcut.isEmpty ? nil : shortcut, for: clip)
+                }
+            }
+        }
+        .onAppear {
+            draft = clip.text
+            shortcut = clip.shortcut ?? ""
+        }
+        .onChange(of: clip.id) { _, _ in
+            draft = clip.text
+            shortcut = clip.shortcut ?? ""
         }
     }
 }

@@ -250,8 +250,6 @@ body:after{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;opa
 @media(max-width:600px){.hero{overflow-clip-margin:52px}.hero:after{bottom:-4%;height:36%}.hero-shelf{bottom:-30px}.intro{padding-top:82px}.shelf-continuation{height:58px;margin:-38px auto 27px;gap:7px}.continuation-line{height:28px}.shelf-continuation+.award-row{margin-bottom:35px}}
 @media(prefers-reduced-motion:reduce){.hero-shelf{transform:translateX(-50%);will-change:auto}}
 
-.lang-toggle{border:1px solid rgba(255,255,255,.18);padding:8px 9px;border-radius:999px;background:rgba(255,255,255,.08);color:#b4c9ff;font:700 10px var(--mono);letter-spacing:.08em;cursor:pointer;transition:background .2s ease,color .2s ease}.lang-toggle:hover{background:#fff;color:#1d46d2}
-@media(max-width:850px){.lang-toggle{display:none}}
 
 /* Static adaptation of the supplied MacbookScroll component. The page is
    intentionally dependency-free, but keeps the same perspective, lid reveal,
@@ -300,7 +298,6 @@ body:after{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;opa
 
 /* Larger actions with the supplied official social marks. */
 .download-pill{min-height:48px;padding:13px 18px;border-radius:14px;font-size:13px;gap:8px}
-.lang-toggle{min-height:38px;padding:9px 11px;font-size:11px}
 .nav-links a{padding:11px 14px;font-size:12px}
 .hero-button,.footer-button{min-height:56px;padding:17px 27px;font-size:15px}
 .cta-action{min-height:58px;padding:17px 27px;gap:10px;font-size:15px}
@@ -752,75 +749,6 @@ html,body{overflow-x:hidden}
   color:rgba(255,255,255,.62);
 }
 .floating-nav .nav-links a:hover{background:rgba(255,255,255,.12);color:#fff}
-.floating-nav .lang-toggle{
-  flex:0 0 auto;
-  display:grid;
-  place-items:center;
-  width:26px;
-  height:26px;
-  min-height:0;
-  padding:0;
-  border:1px solid rgba(255,255,255,.22);
-  border-radius:999px;
-  background:none;
-  overflow:hidden;
-  cursor:pointer;
-  transition:transform .2s ease,border-color .2s ease;
-}
-.floating-nav .lang-toggle:hover{transform:scale(1.08);border-color:rgba(255,255,255,.5)}
-.lang-flag{display:block;width:100%;height:100%;line-height:0}
-.lang-flag svg{display:block;width:100%;height:100%}
-.lang-toggle .lang-flag{width:26px;height:26px}
-
-/* Language menu lives on <body> because the notch clips its overflow. */
-.lang-menu{
-  position:fixed;
-  z-index:40;
-  display:grid;
-  gap:2px;
-  min-width:172px;
-  padding:6px;
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:16px;
-  background:rgba(14,14,18,.72);
-  box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 18px 40px rgba(0,0,0,.34);
-  backdrop-filter:blur(24px) saturate(180%);
-  -webkit-backdrop-filter:blur(24px) saturate(180%);
-  opacity:0;
-  visibility:hidden;
-  transform:translateY(-6px) scale(.97);
-  transform-origin:top right;
-  transition:opacity .22s ease,transform .22s cubic-bezier(.22,.82,.22,1),visibility .22s;
-}
-.lang-menu.is-open{opacity:1;visibility:visible;transform:none}
-.lang-option{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  width:100%;
-  padding:8px 10px;
-  border:0;
-  border-radius:11px;
-  background:none;
-  color:rgba(255,255,255,.7);
-  font:500 12.5px var(--sans);
-  text-align:left;
-  cursor:pointer;
-  transition:background .18s ease,color .18s ease;
-}
-.lang-option:hover{background:rgba(255,255,255,.1);color:#fff}
-.lang-option .lang-flag{
-  flex:0 0 auto;
-  width:20px;
-  height:20px;
-  border-radius:999px;
-  box-shadow:0 0 0 1px rgba(255,255,255,.24) inset;
-}
-.lang-option .lang-name{flex:1}
-.lang-option .lang-check{opacity:0;font-size:11px;color:#7db3ff}
-.lang-option.is-active{color:#fff}
-.lang-option.is-active .lang-check{opacity:1}
-
 .floating-nav .download-pill{
   flex:0 0 auto;
   align-self:center;
@@ -1261,7 +1189,7 @@ img.app-icon{background:none;box-shadow:none;border-radius:0}
 /* ---- Mobil: doar logo, denumirea si X / GitHub -- pastram nava completa pe tableta (700-850px) ---- */
 .nav-social{display:none}
 @media(max-width:699px){
-  .menu-toggle,.mobile-nav,.nav-links,.download-pill,.lang-toggle{display:none!important}
+  .menu-toggle,.mobile-nav,.nav-links,.download-pill{display:none!important}
   .floating-nav,.floating-nav.is-scrolled{
     width:max-content;max-width:calc(100% - 32px);
   }
@@ -1289,21 +1217,6 @@ img.app-icon{background:none;box-shadow:none;border-radius:0}
 }
 .legal-brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-size:15px}
 .legal-brand .app-icon{width:30px;height:30px}
-.legal-page .lang-toggle{
-  display:grid;
-  place-items:center;
-  width:30px;
-  height:30px;
-  padding:0;
-  border:1px solid rgba(18,42,92,.16);
-  border-radius:999px;
-  background:none;
-  overflow:hidden;
-  cursor:pointer;
-  transition:transform .2s ease,border-color .2s ease;
-}
-.legal-page .lang-toggle:hover{transform:scale(1.08);border-color:rgba(18,42,92,.34)}
-.legal-page .lang-toggle .lang-flag{width:30px;height:30px}
 .legal{
   width:min(720px,calc(100% - 48px));
   margin:0 auto;
@@ -1488,6 +1401,25 @@ img.app-icon{background:none;box-shadow:none;border-radius:0}
 .legal-cta .hero-button .apple-logo{fill:#0b0d12}
 .legal-cta .hero-button:hover{background:#eef5ff}
 .legal-footer{margin-top:0}
+
+/* Footer finale: a quiet illuminated current, unique to Nocket's visual shelf. */
+.footer{background:#050608}
+.footer-inner{position:relative;z-index:3}
+.footer-stage{position:relative;isolation:isolate;height:clamp(280px,31vw,510px);overflow:hidden;background:radial-gradient(70% 58% at 51% 58%,rgba(82,120,222,.18),transparent 67%),linear-gradient(180deg,#050608 0%,#080a10 42%,#101a38 100%)}
+.footer-stage:before{content:"";position:absolute;z-index:0;inset:18% -10% 0;background:radial-gradient(ellipse at 50% 100%,rgba(44,192,255,.2),transparent 49%),radial-gradient(ellipse at 58% 96%,rgba(255,122,104,.18),transparent 43%);filter:blur(20px)}
+.footer-stage:after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,rgba(5,6,8,.78) 0%,transparent 42%,rgba(3,5,13,.14) 100%);pointer-events:none}
+.footer-stage .footer-word{position:absolute;z-index:1;top:2%;left:50%;width:100%;padding:0 3vw;color:rgba(221,230,255,.075);font-size:min(31vw,590px);line-height:.72;letter-spacing:-.085em;text-align:center;transform:translateX(-50%);user-select:none}
+.footer-orbit{position:absolute;z-index:1;display:block;width:120%;height:72%;border:1px solid rgba(111,211,255,.2);border-radius:50%;filter:drop-shadow(0 0 12px rgba(46,155,255,.22));pointer-events:none}
+.footer-orbit-one{top:47%;left:-38%;transform:rotate(-11deg)}
+.footer-orbit-two{top:38%;right:-48%;border-color:rgba(255,147,109,.2);transform:rotate(14deg)}
+.footer-flow{position:absolute;z-index:2;display:block;width:116%;height:48%;border-radius:52% 48% 0 0 / 88% 88% 0 0;transform-origin:center bottom;pointer-events:none}
+.footer-flow:before{content:"";position:absolute;inset:0;border-radius:inherit;border-top:2px solid rgba(220,250,255,.8);box-shadow:0 -1px 18px rgba(68,198,255,.9),0 -10px 42px rgba(48,116,255,.34)}
+.footer-flow-one{bottom:-20%;left:-11%;background:linear-gradient(104deg,rgba(17,88,204,.82),rgba(53,200,250,.77) 46%,rgba(35,60,168,.82));clip-path:polygon(0 42%,14% 25%,28% 37%,42% 12%,54% 35%,67% 23%,80% 43%,92% 16%,100% 34%,100% 100%,0 100%);transform:rotate(-2deg)}
+.footer-flow-two{bottom:-10%;left:-8%;background:linear-gradient(108deg,rgba(20,29,112,.86),rgba(74,81,207,.82) 39%,rgba(255,112,78,.78) 61%,rgba(37,130,222,.72));clip-path:polygon(0 56%,16% 28%,31% 47%,45% 21%,57% 44%,72% 8%,86% 33%,100% 19%,100% 100%,0 100%);transform:rotate(1deg)}
+.footer-flow-three{bottom:-29%;left:-3%;height:56%;background:linear-gradient(100deg,rgba(20,103,196,.75),rgba(33,207,255,.6) 32%,rgba(255,112,75,.9) 58%,rgba(245,93,88,.62) 75%,rgba(49,64,185,.78));clip-path:polygon(0 46%,14% 35%,27% 52%,39% 30%,52% 44%,64% 21%,78% 42%,90% 25%,100% 39%,100% 100%,0 100%);transform:rotate(-1deg)}
+.footer-flow-three:before{border-top-color:rgba(255,230,216,.92);box-shadow:0 -1px 18px rgba(255,116,80,.92),0 -11px 36px rgba(91,94,255,.32)}
+@media(max-width:600px){.footer-stage{height:280px}.footer-stage .footer-word{top:9%;font-size:31vw}.footer-orbit{width:150%;height:58%}.footer-orbit-one{left:-67%;top:50%}.footer-orbit-two{right:-76%;top:42%}.footer-flow{width:145%;left:-23%}.footer-flow-one{bottom:-15%}.footer-flow-two{bottom:-5%}.footer-flow-three{bottom:-23%}}
+@media(prefers-reduced-motion:reduce){.footer-stage *{transition:none!important;animation:none!important}}
 @keyframes legalNavIn{from{opacity:0;transform:translate(-50%,-14px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes legalHeroIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes legalGlowOne{from{transform:translate(-4%,-2%) scale(.95)}to{transform:translate(14%,12%) scale(1.12)}}
@@ -1503,8 +1435,8 @@ img.app-icon{background:none;box-shadow:none;border-radius:0}
 }
 @media(max-width:699px){
   .legal-nav,.legal-nav.is-scrolled{width:calc(100% - 32px);top:12px;border-radius:17px}
-  .legal-nav .nav-links,.legal-nav .download-pill{display:none!important}
-  .legal-nav .lang-toggle{display:grid!important}
+  .legal-nav .nav-links{display:none!important}
+  .legal-nav .download-pill{display:flex!important}
   .legal-nav .nav-bar{justify-content:space-between;gap:10px}
 }
 @media(max-width:600px){

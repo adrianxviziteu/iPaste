@@ -115,6 +115,9 @@ struct Clip: Identifiable, Codable, Hashable, Sendable {
     var shortcut: String?
     /// An optional reminder, shared by every kind of saved clip.
     var reminder: ClipReminder?
+    /// Kept locally to surface genuinely useful clips without any telemetry.
+    var usageCount: Int?
+    var lastUsedAt: Date?
     /// Fingerprint for deduplication — identical content is never stored twice.
     var fingerprint: String
     var byteSize: Int
@@ -132,6 +135,8 @@ struct Clip: Identifiable, Codable, Hashable, Sendable {
         category: String? = nil,
         shortcut: String? = nil,
         reminder: ClipReminder? = nil,
+        usageCount: Int? = nil,
+        lastUsedAt: Date? = nil,
         fingerprint: String,
         byteSize: Int
     ) {
@@ -147,6 +152,8 @@ struct Clip: Identifiable, Codable, Hashable, Sendable {
         self.category = category
         self.shortcut = shortcut
         self.reminder = reminder
+        self.usageCount = usageCount
+        self.lastUsedAt = lastUsedAt
         self.fingerprint = fingerprint
         self.byteSize = byteSize
     }
@@ -178,6 +185,8 @@ struct Clip: Identifiable, Codable, Hashable, Sendable {
             .joined(separator: " ")
             .lowercased()
     }
+
+    var useCount: Int { usageCount ?? 0 }
 
     /// The color itself, for `.color` clips.
     var color: NSColor? {

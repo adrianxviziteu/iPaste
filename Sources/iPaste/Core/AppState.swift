@@ -15,9 +15,10 @@ final class AppState: ObservableObject {
     let monitor: ClipboardMonitor
     let paster: Paster
     let preferences: Preferences
-    let iCloudSync: ICloudSyncService
+    let temporaryShare = TemporaryShareService()
 
     private let hoverMonitor = ShelfHoverMonitor()
+    private lazy var snippetMonitor = SnippetExpansionMonitor(store: store, paster: paster)
     private var orderOutWorkItem: DispatchWorkItem?
     private var flashPanel: FloatingPanel?
     private var flashHideWorkItem: DispatchWorkItem?
@@ -25,7 +26,6 @@ final class AppState: ObservableObject {
     private var confirmationWorkItem: DispatchWorkItem?
     private var modeObserver: AnyCancellable?
     private var retentionObserver: AnyCancellable?
-    private var iCloudObserver: AnyCancellable?
     private var retentionTimer: Timer?
     private var appActivationObserver: NSObjectProtocol?
     private var reminderPickerWindow: NSWindow?
@@ -50,6 +50,7 @@ final class AppState: ObservableObject {
     private var settingsWindow: NSWindow?
     private var quickNotesWindow: NSWindow?
     private var libraryWindow: NSWindow?
+    private var shareWindow: NSWindow?
 
     init() {
         let preferences = Preferences()
@@ -59,7 +60,6 @@ final class AppState: ObservableObject {
         self.store = store
         self.monitor = monitor
         self.paster = Paster(store: store, monitor: monitor)
-        self.iCloudSync = ICloudSyncService(store: store)
     }
 
     // MARK: - Startup
@@ -82,6 +82,7 @@ final class AppState: ObservableObject {
         }
         configureReminders()
         monitor.start()
+        snippetMonitor.start()
         registerHotKeys()
         configureHover()
         applyShelfMode()
@@ -96,11 +97,6 @@ final class AppState: ObservableObject {
         retentionObserver = preferences.$historyRetentionDays
             .dropFirst()
             .sink { [weak self] _ in self?.purgeExpiredClips() }
-
-        iCloudSync.setEnabled(preferences.iCloudSyncEnabled)
-        iCloudObserver = preferences.$iCloudSyncEnabled
-            .dropFirst()
-            .sink { [weak self] enabled in self?.iCloudSync.setEnabled(enabled) }
 
         showOnboardingIfNeeded()
     }
@@ -189,6 +185,13 @@ final class AppState: ObservableObject {
     private func scheduleAllReminderNotifications() {
         for clip in store.clips {
             guard let reminder = clip.reminder else { continue }
+            if reminder.kind == .atDate,
+               let fireDate = reminder.fireDate,
+               fireDate <= Date() {
+                // One-time reminders must not revive every time iPaste opens.
+                removeReminder(from: clip)
+                continue
+            }
             scheduleReminderNotification(for: clip, reminder: reminder)
         }
     }
@@ -199,7 +202,8 @@ final class AppState: ObservableObject {
         center.removePendingNotificationRequests(withIdentifiers: [identifier])
 
         guard reminder.kind == .atDate,
-              let date = reminder.fireDate
+              let date = reminder.fireDate,
+              date > Date()
         else { return }
 
         let content = UNMutableNotificationContent()
@@ -208,8 +212,7 @@ final class AppState: ObservableObject {
         content.sound = .default
         content.userInfo = ["clipID": clip.id.uuidString]
 
-        let seconds = max(1, date.timeIntervalSinceNow)
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: date.timeIntervalSinceNow, repeats: false)
         center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)) { error in
             if let error { NSLog("iPaste: could not schedule reminder — \(error.localizedDescription)") }
         }
@@ -223,6 +226,13 @@ final class AppState: ObservableObject {
 
     private func reminderNotificationID(for clip: Clip) -> String {
         "clip-reminder-\(clip.id.uuidString)"
+    }
+
+    func acknowledgeReminder(clipID: String) {
+        guard let id = UUID(uuidString: clipID),
+              let clip = store.clips.first(where: { $0.id == id })
+        else { return }
+        removeReminder(from: clip)
     }
 
     private func requestNotificationPermissionIfNeeded() {
@@ -287,6 +297,11 @@ final class AppState: ObservableObject {
         HotKeyCenter.shared.register(.controlCommand(0x01)) { [weak self] in
             self?.toggleShelf()
         }
+
+        // ⌃⌘P pastes the intentionally ordered clipboard stack.
+        HotKeyCenter.shared.register(.controlCommand(0x23)) { [weak self] in
+            self?.pasteStack()
+        }
     }
 
     // MARK: - Actions
@@ -321,21 +336,62 @@ final class AppState: ObservableObject {
     func paste(_ clip: Clip) {
         hideQuickSearch()
         paster.paste(clip)
+        store.markUsed(clip)
         confirm(clip, saying: "Pasted")
     }
 
     func copy(_ clip: Clip) {
         hideQuickSearch()
         paster.copyToPasteboard(clip)
+        store.markUsed(clip)
         // Copying is silent by nature — the pill is the only sign it worked.
         confirm(clip, saying: "Copied")
     }
 
     func copyTextVariant(_ text: String, for clip: Clip) {
-        monitor.suppressNextChange()
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
+        monitor.ignoreOwnChanges(through: NSPasteboard.general.changeCount)
         confirm(clip, saying: "Copied")
+    }
+
+    func apply(_ action: ClipAction, to clip: Clip) {
+        guard let text = action.apply(to: clip.text) else { return }
+        copyTextVariant(text, for: clip)
+    }
+
+    func pasteStack() {
+        let clips = store.stack
+        guard !clips.isEmpty else { return }
+        hideQuickSearch()
+        for (index, clip) in clips.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.38 * Double(index)) { [weak self] in
+                guard let self else { return }
+                self.paster.paste(clip)
+                self.store.markUsed(clip)
+            }
+        }
+        if let first = clips.first { confirm(first, saying: "Pasting \(clips.count) clips") }
+    }
+
+    func shareTemporarily(_ clip: Clip) {
+        guard clip.kind != .multi else { return }
+        if clip.kind == .image,
+           let imageURL = store.imageURL(for: clip),
+           let data = try? Data(contentsOf: imageURL) {
+            temporaryShare.share(data: data, contentType: "image/png")
+        } else {
+            temporaryShare.share(text: clip.text)
+        }
+        let window = shareWindow ?? makeShareWindow()
+        shareWindow = window
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+    }
+
+    func stopSharing() {
+        temporaryShare.stop()
+        shareWindow?.orderOut(nil)
     }
 
     @discardableResult
@@ -402,6 +458,9 @@ final class AppState: ObservableObject {
 
     private func purgeExpiredClips() {
         _ = store.removeExpiredClips(olderThanDays: preferences.historyRetentionDays)
+        for (bundleID, days) in preferences.retentionDaysByApplication {
+            _ = store.removeExpiredClips(olderThanDays: days, sourceBundleID: bundleID)
+        }
     }
 
     /// Confirms an action the user just took.
@@ -541,6 +600,20 @@ final class AppState: ObservableObject {
         )
         window.isReleasedWhenClosed = false
         window.minSize = NSSize(width: 420, height: 280)
+        window.center()
+        return window
+    }
+
+    private func makeShareWindow() -> NSWindow {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 330, height: 400),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "Share Clip"
+        window.contentView = NSHostingView(rootView: TemporaryShareView(service: temporaryShare).environmentObject(self))
+        window.isReleasedWhenClosed = false
         window.center()
         return window
     }

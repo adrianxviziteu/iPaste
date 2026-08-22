@@ -80,13 +80,6 @@ struct SettingsView: View {
             }
 
             Section {
-                Toggle("Sync history with iCloud", isOn: $preferences.iCloudSyncEnabled)
-                ICloudSyncStatusView(service: app.iCloudSync)
-            } header: {
-                Text("iCloud Sync")
-            }
-
-            Section {
                 Toggle("Don't save sensitive content", isOn: $preferences.sensitiveContentProtection)
 
                 if preferences.ignoredApplications.isEmpty {
@@ -107,8 +100,46 @@ struct SettingsView: View {
                 Text("Passwords, private keys, access tokens, valid card numbers, and clips from ignored applications are not saved.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                let sources = Dictionary(grouping: app.store.clips, by: { $0.sourceBundleID ?? "" })
+                if !sources.isEmpty {
+                    Divider()
+                    Text("Per-app deletion")
+                        .font(.caption.weight(.semibold))
+                    ForEach(sources.keys.filter { !$0.isEmpty }.sorted(), id: \.self) { bundleID in
+                        let name = sources[bundleID]?.first?.sourceAppName ?? bundleID
+                        Picker(name, selection: Binding(
+                            get: { preferences.retentionDaysByApplication[bundleID] ?? 0 },
+                            set: { preferences.setRetention(days: $0 == 0 ? nil : $0, for: bundleID) }
+                        )) {
+                            Text("Global").tag(0)
+                            Text("1 day").tag(1)
+                            Text("7 days").tag(7)
+                            Text("30 days").tag(30)
+                        }
+                    }
+                }
             } header: {
                 Text("Privacy")
+            }
+
+            Section {
+                let summary = app.store.usageSummary
+                Text("\(summary.totalClips) clips · \(summary.totalUses) pastes/copies")
+                ForEach(summary.sources) { source in
+                    HStack {
+                        Text(source.name)
+                        Spacer()
+                        Text("\(source.clipCount) saved · \(source.uses) used")
+                            .foregroundStyle(.secondary)
+                    }
+                    .font(.caption)
+                }
+                Text("These statistics stay on this Mac and are never sent anywhere.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Text("Private activity")
             }
 
             Section {
@@ -122,39 +153,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(minWidth: 520, minHeight: 510)
+        .frame(minWidth: 520, minHeight: 450)
         .padding(.vertical, 8)
-    }
-}
-
-private struct ICloudSyncStatusView: View {
-    @ObservedObject var service: ICloudSyncService
-
-    var body: some View {
-        HStack(spacing: 7) {
-            Image(systemName: statusSymbol)
-                .foregroundStyle(statusColor)
-            Text(service.status.label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    private var statusSymbol: String {
-        switch service.status {
-        case .off:         return "icloud"
-        case .connecting:  return "arrow.triangle.2.circlepath.icloud"
-        case .ready:       return "checkmark.icloud"
-        case .unavailable: return "exclamationmark.icloud"
-        case .failed:      return "xmark.icloud"
-        }
-    }
-
-    private var statusColor: Color {
-        switch service.status {
-        case .ready:                   return .green
-        case .unavailable, .failed:    return .orange
-        case .off, .connecting:        return .secondary
-        }
     }
 }

@@ -86,8 +86,10 @@ final class Preferences: ObservableObject {
         didSet { defaults.set(sensitiveContentProtection, forKey: Key.sensitiveContentProtection) }
     }
 
-    @Published var iCloudSyncEnabled: Bool {
-        didSet { defaults.set(iCloudSyncEnabled, forKey: Key.iCloudSyncEnabled) }
+    /// Optional retention overrides per source application. A missing value uses
+    /// the global policy; zero means keep normal history behavior unchanged.
+    @Published var retentionDaysByApplication: [String: Int] {
+        didSet { defaults.set(retentionDaysByApplication, forKey: Key.retentionDaysByApplication) }
     }
 
     private let defaults: UserDefaults
@@ -101,7 +103,7 @@ final class Preferences: ObservableObject {
         static let ignoredApplications = "ignoredApplications"
         static let smartFiltersEnabled = "smartFiltersEnabled"
         static let sensitiveContentProtection = "sensitiveContentProtection"
-        static let iCloudSyncEnabled = "iCloudSyncEnabled"
+        static let retentionDaysByApplication = "retentionDaysByApplication"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -118,7 +120,7 @@ final class Preferences: ObservableObject {
         self.ignoredApplications = Self.loadIgnoredApplications(from: defaults)
         self.smartFiltersEnabled = defaults.object(forKey: Key.smartFiltersEnabled) as? Bool ?? true
         self.sensitiveContentProtection = defaults.object(forKey: Key.sensitiveContentProtection) as? Bool ?? true
-        self.iCloudSyncEnabled = defaults.bool(forKey: Key.iCloudSyncEnabled)
+        self.retentionDaysByApplication = defaults.dictionary(forKey: Key.retentionDaysByApplication) as? [String: Int] ?? [:]
     }
 
     func ignores(bundleID: String?) -> Bool {
@@ -133,6 +135,15 @@ final class Preferences: ObservableObject {
 
     func unignoreApplication(bundleID: String) {
         ignoredApplications.removeValue(forKey: bundleID)
+    }
+
+    func setRetention(days: Int?, for bundleID: String) {
+        guard !bundleID.isEmpty else { return }
+        if let days, days > 0 {
+            retentionDaysByApplication[bundleID] = min(days, 3650)
+        } else {
+            retentionDaysByApplication.removeValue(forKey: bundleID)
+        }
     }
 
     private func saveIgnoredApplications() {

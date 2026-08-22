@@ -296,8 +296,8 @@ struct ShelfHero: View {
 
 // MARK: - 5. Library
 
-/// The current product has no separate Library window. Selection expands the
-/// notch itself and reveals the contextual inspector under the card shelf.
+/// The library combines a searchable history with the contextual inspector
+/// used for editing, snippets, and clip actions.
 struct LibraryHero: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

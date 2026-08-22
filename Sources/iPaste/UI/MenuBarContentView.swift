@@ -31,11 +31,17 @@ struct MenuBarContentView: View {
             Button(app.isShelfVisible ? "Hide Shelf" : "Show Shelf") { app.toggleShelf() }
                 .keyboardShortcut("s", modifiers: [.control, .command])
 
+            if !store.stack.isEmpty {
+                Button("Paste Stack (\(store.stack.count))") { app.pasteStack() }
+                    .keyboardShortcut("p", modifiers: [.control, .command])
+            }
+
             Menu("Tools") {
                 Button("Quick Note…") { app.showQuickNotes() }
                     .keyboardShortcut("n", modifiers: [.control, .command])
                 Button("Capture Selected Text") { app.captureSelectedText() }
                 Button("Color Picker…") { app.pickColor() }
+                Button("Open Library…") { app.showLibrary() }
                 Divider()
                 Button("Show Guide…") { app.showOnboarding() }
             }

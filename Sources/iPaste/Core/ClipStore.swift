@@ -10,6 +10,9 @@ import UserNotifications
 final class ClipStore: ObservableObject {
     @Published private(set) var clips: [Clip] = []
     @Published var categories: [String] = []
+    /// An ordered temporary work queue. IDs, rather than content, keep it small
+    /// and automatically survive normal history persistence.
+    @Published private(set) var stackIDs: [UUID] = []
 
     /// How many unpinned clips to keep. Pinned ones are never trimmed.
     var historyLimit = 500
@@ -19,7 +22,7 @@ final class ClipStore: ObservableObject {
     private let databaseURL: URL
     private var saveTask: Task<Void, Never>?
     private let thumbnailCache = NSCache<NSString, NSImage>()
-    private var cloudDirectory: URL?
+    private let stackDefaultsKey = "clipboardStackIDs"
 
     init(directory: URL? = nil) {
         let base = directory ?? FileManager.default
@@ -32,6 +35,9 @@ final class ClipStore: ObservableObject {
 
         try? FileManager.default.createDirectory(at: imagesDirectory, withIntermediateDirectories: true)
         load()
+        stackIDs = UserDefaults.standard.stringArray(forKey: stackDefaultsKey)?
+            .compactMap(UUID.init(uuidString:))
+            .filter { id in clips.contains { $0.id == id } } ?? []
     }
 
     // MARK: - Reading
@@ -60,8 +66,72 @@ final class ClipStore: ObservableObject {
         }
     }
 
+    func semanticClips(matching query: String, kind: ClipKind? = nil, category: String? = nil) -> [Clip] {
+        var result = orderedClips
+        if let kind { result = result.filter { $0.kind == kind } }
+        if let category { result = result.filter { $0.category == category } }
+        return LocalSemanticSearch.ranked(result, query: query)
+    }
+
+    var stack: [Clip] {
+        stackIDs.compactMap { id in clips.first { $0.id == id } }
+    }
+
+    var smartFavorites: [Clip] {
+        clips.filter { !$0.pinned && $0.useCount >= 3 }
+            .sorted { lhs, rhs in
+                lhs.useCount == rhs.useCount ? lhs.createdAt > rhs.createdAt : lhs.useCount > rhs.useCount
+            }
+            .prefix(8).map { $0 }
+    }
+
+    var usageSummary: UsageSummary {
+        let copied = clips.reduce(0) { $0 + $1.useCount }
+        let sources = Dictionary(grouping: clips, by: { $0.sourceAppName ?? "Unknown" })
+            .map { UsageSummary.Source(name: $0.key, clipCount: $0.value.count, uses: $0.value.reduce(0) { $0 + $1.useCount }) }
+            .sorted { $0.uses == $1.uses ? $0.clipCount > $1.clipCount : $0.uses > $1.uses }
+        return UsageSummary(totalClips: clips.count, totalUses: copied, sources: Array(sources.prefix(3)))
+    }
+
     func clip(withShortcut shortcut: String) -> Clip? {
         clips.first { $0.shortcut == shortcut }
+    }
+
+    func markUsed(_ clip: Clip) {
+        guard let index = clips.firstIndex(where: { $0.id == clip.id }) else { return }
+        clips[index].usageCount = clips[index].useCount + 1
+        clips[index].lastUsedAt = Date()
+        scheduleSave()
+    }
+
+    func setShortcut(_ shortcut: String?, for clip: Clip) -> Bool {
+        guard let index = clips.firstIndex(where: { $0.id == clip.id }),
+              ![ClipKind.image, .file, .multi].contains(clips[index].kind)
+        else { return false }
+        let normalized = shortcut?.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard normalized == nil || normalized?.isEmpty == true || normalized?.hasPrefix(";") == true else { return false }
+        guard normalized == nil || normalized?.isEmpty == true || !clips.contains(where: { $0.id != clip.id && $0.shortcut == normalized }) else { return false }
+        clips[index].shortcut = normalized?.isEmpty == true ? nil : normalized
+        scheduleSave()
+        return true
+    }
+
+    func toggleStack(_ clip: Clip) {
+        if let index = stackIDs.firstIndex(of: clip.id) {
+            stackIDs.remove(at: index)
+        } else {
+            stackIDs.append(clip.id)
+        }
+        saveStack()
+    }
+
+    func clearStack() {
+        stackIDs = []
+        saveStack()
+    }
+
+    func containsClip(fingerprint: String) -> Bool {
+        clips.contains { $0.fingerprint == fingerprint }
     }
 
     // MARK: - Writing
@@ -88,6 +158,8 @@ final class ClipStore: ObservableObject {
 
     func delete(_ clip: Clip) {
         clips.removeAll { $0.id == clip.id }
+        stackIDs.removeAll { $0 == clip.id }
+        saveStack()
         removeImageFile(for: clip)
         cancelReminderNotification(for: clip)
         scheduleSave()
@@ -106,10 +178,41 @@ final class ClipStore: ObservableObject {
               ![ClipKind.image, .file, .multi].contains(clips[index].kind)
         else { return }
 
-        clips[index].text = text
-        clips[index].fingerprint = SHA256.hash(data: Data(text.utf8))
+        let fingerprint = SHA256.hash(data: Data(text.utf8))
             .map { String(format: "%02x", $0) }
             .joined()
+
+        // Editing an item must keep the same deduplication guarantee as a
+        // normal capture. Preserve the useful metadata rather than leaving two
+        // records with identical contents.
+        if let duplicateIndex = clips.indices.first(where: {
+            $0 != index && clips[$0].fingerprint == fingerprint
+        }) {
+            let edited = clips[index]
+            var existing = clips[duplicateIndex]
+            existing.createdAt = Date()
+            existing.pinned = existing.pinned || edited.pinned
+            existing.category = existing.category ?? edited.category
+            existing.shortcut = existing.shortcut ?? edited.shortcut
+            existing.reminder = existing.reminder ?? edited.reminder
+            clips[duplicateIndex] = existing
+            clips.remove(at: index)
+            stackIDs.removeAll { $0 == edited.id }
+            saveStack()
+            cancelReminderNotification(for: edited)
+            scheduleSave()
+            return
+        }
+
+        clips[index].text = text
+        clips[index].fingerprint = fingerprint
+        clips[index].byteSize = text.utf8.count
+        scheduleSave()
+    }
+
+    func acceptFavoriteSuggestion(_ clip: Clip) {
+        guard let index = clips.firstIndex(where: { $0.id == clip.id }) else { return }
+        clips[index].pinned = true
         scheduleSave()
     }
 
@@ -182,6 +285,8 @@ final class ClipStore: ObservableObject {
     func clearHistory() {
         let removed = clips.filter { !$0.pinned }
         clips.removeAll { !$0.pinned }
+        stackIDs.removeAll { id in removed.contains { $0.id == id } }
+        saveStack()
         removed.forEach {
             removeImageFile(for: $0)
             cancelReminderNotification(for: $0)
@@ -204,6 +309,18 @@ final class ClipStore: ObservableObject {
             removeImageFile(for: $0)
             cancelReminderNotification(for: $0)
         }
+        scheduleSave()
+        return removed.count
+    }
+
+    @discardableResult
+    func removeExpiredClips(olderThanDays days: Int, sourceBundleID: String, now: Date = Date()) -> Int {
+        guard days > 0 else { return 0 }
+        let cutoff = now.addingTimeInterval(-TimeInterval(days) * 86_400)
+        let removed = clips.filter { !$0.pinned && $0.sourceBundleID == sourceBundleID && $0.createdAt < cutoff }
+        guard !removed.isEmpty else { return 0 }
+        clips.removeAll { clip in removed.contains { $0.id == clip.id } }
+        removed.forEach { removeImageFile(for: $0); cancelReminderNotification(for: $0) }
         scheduleSave()
         return removed.count
     }
@@ -239,6 +356,13 @@ final class ClipStore: ObservableObject {
         return image
     }
 
+    /// Removes an image written during capture when the clip was deduplicated
+    /// before it could reference that file.
+    func discardImage(named filename: String) {
+        thumbnailCache.removeObject(forKey: filename as NSString)
+        try? FileManager.default.removeItem(at: imagesDirectory.appendingPathComponent(filename))
+    }
+
     private func removeImageFile(for clip: Clip) {
         guard let url = imageURL(for: clip) else { return }
         thumbnailCache.removeObject(forKey: (clip.imageFilename ?? "") as NSString)
@@ -252,9 +376,11 @@ final class ClipStore: ObservableObject {
         guard unpinned.count > historyLimit else { return }
         for old in unpinned.dropFirst(historyLimit) {
             clips.removeAll { $0.id == old.id }
+            stackIDs.removeAll { $0 == old.id }
             removeImageFile(for: old)
             cancelReminderNotification(for: old)
         }
+        saveStack()
     }
 
     private func cancelReminderNotification(for clip: Clip) {
@@ -283,85 +409,8 @@ final class ClipStore: ObservableObject {
             encoder.dateEncodingStrategy = .iso8601
             let data = try encoder.encode(snapshot)
             try data.write(to: url, options: .atomic)
-            saveCloudSnapshot(data: data)
         } catch {
             NSLog("iPaste: saving history failed — \(error.localizedDescription)")
-        }
-    }
-
-    // MARK: - iCloud snapshot
-
-    func enableICloudSync(at directory: URL) throws {
-        cloudDirectory = directory
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try FileManager.default.createDirectory(
-            at: directory.appendingPathComponent("Images", isDirectory: true),
-            withIntermediateDirectories: true
-        )
-        try mergeICloudSnapshot()
-        save()
-    }
-
-    func disableICloudSync() {
-        cloudDirectory = nil
-    }
-
-    /// Pulls a downloaded iCloud snapshot and merges it without replacing newer
-    /// local copies. Fingerprints are stable across Macs, unlike local file paths.
-    func mergeICloudSnapshot() throws {
-        guard let cloudDirectory else { return }
-        let cloudDatabase = cloudDirectory.appendingPathComponent("history.json")
-        guard let data = try? Data(contentsOf: cloudDatabase) else { return }
-
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let remote = try decoder.decode(Database.self, from: data)
-        let cloudImages = cloudDirectory.appendingPathComponent("Images", isDirectory: true)
-
-        for remoteClip in remote.clips {
-            if let localIndex = clips.firstIndex(where: { $0.fingerprint == remoteClip.fingerprint }) {
-                if remoteClip.createdAt > clips[localIndex].createdAt {
-                    clips[localIndex] = remoteClip
-                }
-            } else {
-                clips.append(remoteClip)
-            }
-
-            if let filename = remoteClip.imageFilename {
-                let localURL = imagesDirectory.appendingPathComponent(filename)
-                let cloudURL = cloudImages.appendingPathComponent(filename)
-                if !FileManager.default.fileExists(atPath: localURL.path),
-                   FileManager.default.fileExists(atPath: cloudURL.path) {
-                    try? FileManager.default.copyItem(at: cloudURL, to: localURL)
-                }
-            }
-        }
-
-        categories = Array(Set(categories).union(remote.categories)).sorted()
-        trimHistory()
-        save()
-    }
-
-    private func saveCloudSnapshot(data: Data) {
-        guard let cloudDirectory else { return }
-        let cloudDatabase = cloudDirectory.appendingPathComponent("history.json")
-        let cloudImages = cloudDirectory.appendingPathComponent("Images", isDirectory: true)
-
-        do {
-            try FileManager.default.createDirectory(at: cloudImages, withIntermediateDirectories: true)
-            try data.write(to: cloudDatabase, options: .atomic)
-
-            for clip in clips {
-                guard let filename = clip.imageFilename else { continue }
-                let localURL = imagesDirectory.appendingPathComponent(filename)
-                let cloudURL = cloudImages.appendingPathComponent(filename)
-                guard FileManager.default.fileExists(atPath: localURL.path),
-                      !FileManager.default.fileExists(atPath: cloudURL.path)
-                else { continue }
-                try? FileManager.default.copyItem(at: localURL, to: cloudURL)
-            }
-        } catch {
-            NSLog("iPaste: iCloud snapshot save failed — \(error.localizedDescription)")
         }
     }
 
@@ -386,8 +435,25 @@ final class ClipStore: ObservableObject {
         categories = database.categories
     }
 
+    private func saveStack() {
+        UserDefaults.standard.set(stackIDs.map(\.uuidString), forKey: stackDefaultsKey)
+    }
+
     private struct Database: Codable {
         var clips: [Clip]
         var categories: [String]
     }
+}
+
+struct UsageSummary {
+    struct Source: Identifiable {
+        var id: String { name }
+        let name: String
+        let clipCount: Int
+        let uses: Int
+    }
+
+    let totalClips: Int
+    let totalUses: Int
+    let sources: [Source]
 }
